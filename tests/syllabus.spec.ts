@@ -84,7 +84,7 @@ test('shows the SVA course facts without artwork in the hero', async ({ page }) 
     'Preparing raw data for rigorous analysis',
     'Interviewing data to develop meaningful findings',
     'Verifying your findings in the real world',
-    'Ensuring subjects have an opportunity to respond'
+    'Ensuring subjects have a shot to sound off'
   ]);
   await expect(page.locator('.course-quote p')).toHaveText(
     "“To cope with the acceleration of social change in today's world, journalism must become social science in a hurry.”"
