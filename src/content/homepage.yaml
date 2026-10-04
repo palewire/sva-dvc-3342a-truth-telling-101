@@ -44,11 +44,11 @@ skills:
       icon: 'Database'
     - title: 'Preparing raw data for rigorous analysis'
       icon: 'Hammer'
-    - title: 'Interviewing prepared data to develop meaningful findings'
+    - title: 'Interviewing prepared data to develop findings'
       icon: 'BarChart3'
     - title: 'Testing your findings against the real world'
       icon: 'Map'
-    - title: 'Ensuring your subjects have a say in the story'
+    - title: 'Ensuring your subjects have a say'
       icon: 'MessageCircle'
 
 schedule:
