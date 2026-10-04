@@ -38,17 +38,17 @@ skills:
   title: 'Fundamental skills'
   description: "You'll get multiple rounds of practice applying the key techniques common to every data story."
   items:
-    - title: 'Identifying newsworthy questions'
+    - title: 'Identifying measurable questions'
       icon: 'Lightbulb'
     - title: 'Locating data that can provide the answers'
       icon: 'Database'
     - title: 'Preparing raw data for rigorous analysis'
       icon: 'Hammer'
-    - title: 'Interviewing data to develop meaningful findings'
+    - title: 'Interviewing prepared data to develop meaningful findings'
       icon: 'BarChart3'
-    - title: 'Verifying your findings in the real world'
+    - title: 'Testing your findings against the real world'
       icon: 'Map'
-    - title: 'Ensuring subjects have a shot to sound off'
+    - title: 'Ensuring your subjects have a say in the story'
       icon: 'MessageCircle'
 
 schedule:
