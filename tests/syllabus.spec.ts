@@ -80,7 +80,7 @@ test('shows the SVA course facts without artwork in the hero', async ({ page }) 
   await expect(page.locator('.course-skill svg')).toHaveCount(6);
   await expect(page.locator('.course-skill h3')).toHaveText([
     'Identifying measurable questions',
-    'Locating data that can provide the answers',
+    'Locating data that can provide answers',
     'Preparing raw data for rigorous analysis',
     'Interviewing prepared data to develop findings',
     'Testing your findings against the real world',
