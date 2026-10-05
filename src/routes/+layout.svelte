@@ -14,15 +14,13 @@
     <div class="brand">
       <a
         class="brand-mark"
-        href={data.site.course.schoolUrl}
-        aria-label={data.site.course.school + ' home'}
+        href={base + '/'}
+        aria-label={data.site.course.title + ' home'}
       >
         <img src={base + '/sva-mark.svg'} alt="" width="45" height="45" />
       </a>
       <span class="brand-copy">
-        <a class="brand-name" href={data.site.course.schoolUrl}
-          >{data.site.course.school}</a
-        >
+        <a class="brand-name" href={base + '/'}>{data.site.course.school}</a>
       </span>
     </div>
   </div>

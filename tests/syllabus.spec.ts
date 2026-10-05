@@ -49,8 +49,8 @@ test('shows the SVA course facts without artwork in the hero', async ({ page }) 
   } else {
     await expect(page.locator('link[rel="canonical"]')).toHaveCount(0);
   }
-  await expect(page.locator('.brand-mark')).toHaveAttribute('href', 'https://sva.edu');
-  await expect(page.locator('.brand-name')).toHaveAttribute('href', 'https://sva.edu');
+  await expect(page.locator('.brand-mark')).toHaveAttribute('href', `${basePath}/`);
+  await expect(page.locator('.brand-name')).toHaveAttribute('href', `${basePath}/`);
   await page.locator('.brand-name').hover();
   await expect(page.locator('.brand-name')).toHaveCSS('color', 'rgb(73, 73, 73)');
   await expect(page.locator('.brand-program')).toHaveCount(0);
