@@ -60,6 +60,7 @@ schedule:
       date: '2026-10-05'
       displayDate: 'October 5, 2026'
       topic: 'Social science in a hurry'
+      href: /weeks/week-1/
     - number: 2
       date: '2026-10-12'
       displayDate: 'Monday, Oct. 12'
