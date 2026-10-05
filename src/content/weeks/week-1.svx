@@ -24,7 +24,7 @@ week: 1
 2. **Introductions**
 3. **Lecture**
 4. **Questions**
-5. **Student survey**
+5. **[Student survey](https://docs.google.com/forms/d/e/1FAIpQLSezxoxpL94RRMh1B-kQ0Mq1m7TCsK1BIRviqesv3i3zh9YdfQ/viewform?usp=header)**
 6. **Break**
 7. **Spreadsheet exercise**
 8. **Homework**
@@ -33,4 +33,4 @@ week: 1
 
 1. **Identify a measurable question.** Come up with a question based on something you've read in the news that can be answered with a number drawn from a dataset.
 2. **Locate data that can provide the answer.** Try to find a publicly accessible dataset that you could use to answer your measurable question or propose how you might collect the data yourself.
-3. **Prepare to present.** Next week you'll be asked to share your question and dataset with the whole class. Be ready.
+3. **Prepare to present.** Next week, you will be asked to share your question and dataset with the whole class. Be ready.
