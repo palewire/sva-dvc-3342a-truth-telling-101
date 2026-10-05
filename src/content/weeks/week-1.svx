@@ -8,7 +8,16 @@ week: 1
 
 The Week 1 lecture deck, **Social science in a hurry**, introduces the course's database state of mind and follows a data-driven story through six reporting steps.
 
-The deck repository does not yet have a public presentation URL, so an iframe cannot be embedded reliably yet. [Open the deck source on GitHub](https://github.com/palewire/sva-dvc-3342a-slide-deck/tree/main/src/lib/presentations/social-science-in-a-hurry.svx) while the public embed is being configured.
+<iframe
+  src="https://palewi.re/docs/sva-dvc-3342a-slide-deck/lectures/social-science-in-a-hurry/"
+  title="Social science in a hurry lecture deck"
+  width="100%"
+  height="600"
+  loading="lazy"
+  allowfullscreen
+></iframe>
+
+[Open the lecture deck in a new tab](https://palewi.re/docs/sva-dvc-3342a-slide-deck/lectures/social-science-in-a-hurry/).
 
 ## Class outline
 

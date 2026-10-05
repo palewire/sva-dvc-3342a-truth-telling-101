@@ -5,7 +5,7 @@
   const firstWeek = $derived(schedule.weeks[0]);
 </script>
 
-<section class="schedule-section" id="scripts" aria-labelledby="scripts-title">
+<section class="schedule-section" id="schedule" aria-labelledby="scripts-title">
   <div class="container">
     <div class="section-header">
       <p class="section-kicker">{schedule.kicker}</p>
