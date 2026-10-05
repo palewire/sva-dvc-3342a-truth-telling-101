@@ -1,6 +1,7 @@
 <script lang="ts">
   import { base } from '$app/paths';
   import type { PageData } from './$types';
+  import Hero from '$lib/components/Hero.svelte';
   import Meta from '$lib/components/Meta.svelte';
 
   let { data }: { data: PageData } = $props();
@@ -23,15 +24,26 @@
 />
 
 <main id="main-content" class="week-page" tabindex="-1">
+  <Hero
+    course={data.site.course}
+    instructor={data.site.instructor}
+    homeHref={base + '/'}
+  />
   <div class="container week-container">
-    <a class="week-back" href={base + '/#schedule'}>All class dates</a>
-    <p class="eyebrow">Week {data.metadata.week}{week ? ' · ' + week.displayDate : ''}</p>
-    <h1>{data.metadata.title}</h1>
-    {#if data.metadata.summary}
-      <p class="week-summary">{data.metadata.summary}</p>
-    {/if}
-    <article class="week-body">
-      <Content />
-    </article>
+    <div class="week-content">
+      <header class="week-header">
+        <p class="eyebrow">Week {data.metadata.week}</p>
+        <h1>{data.metadata.title}</h1>
+        {#if data.metadata.summary}
+          <p class="week-summary">{data.metadata.summary}</p>
+        {/if}
+        {#if week}
+          <p class="week-date">{week.displayDate}</p>
+        {/if}
+      </header>
+      <article class="week-body">
+        <Content />
+      </article>
+    </div>
   </div>
 </main>

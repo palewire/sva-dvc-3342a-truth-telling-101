@@ -3,10 +3,12 @@
 
   let {
     course,
-    instructor
+    instructor,
+    homeHref
   }: {
     course: CourseContent['course'];
     instructor: CourseContent['instructor'];
+    homeHref?: string;
   } = $props();
 </script>
 
@@ -17,7 +19,13 @@
         {course.term} <span aria-hidden="true">/</span>
         {course.code}
       </p>
-      <h1 id="course-title">Truth-Telling 101</h1>
+      {#if homeHref}
+        <p class="hero-title" id="course-title">
+          <a href={homeHref}>Truth-Telling 101</a>
+        </p>
+      {:else}
+        <h1 class="hero-title" id="course-title">Truth-Telling 101</h1>
+      {/if}
       <p class="hero-proposition">{course.proposition}</p>
     </div>
   </div>

@@ -32,8 +32,7 @@
           <p class="instructor-affiliation">{instructor.role}</p>
         </div>
         <p class="instructor-bio">
-          {instructor.bio}
-          <a href={'mailto:' + instructor.email}>{instructor.email}</a>.
+          {instructor.bio}<a href={'mailto:' + instructor.email}>{instructor.email}</a>.
         </p>
       </div>
     </div>

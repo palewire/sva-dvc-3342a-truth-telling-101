@@ -7,3 +7,4 @@ playwright-report
 lighthouse-report
 .lighthouseci
 .pnpm-store
+src/content/**/*.svx

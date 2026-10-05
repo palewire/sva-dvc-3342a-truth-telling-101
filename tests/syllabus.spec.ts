@@ -124,7 +124,7 @@ test('links the instructor photo to the bio page', async ({ page }) => {
     'News Applications Editor, Reuters'
   );
   await expect(page.locator('.instructor-bio')).toHaveText(
-    'I am a reporter, editor and computer programmer with more than 20 years of journalism experience. You contact me at b@palewi.re.'
+    'I am a reporter, editor and computer programmer with more than 20 years of journalism experience. You can contact me at b@palewi.re.'
   );
   await expect(page.locator('.instructor-bio a[href="mailto:b@palewi.re"]')).toHaveText(
     'b@palewi.re'
@@ -142,26 +142,43 @@ test('links the instructor photo to the bio page', async ({ page }) => {
   await expect(emailLink).toHaveCSS('outline-color', 'rgb(230, 31, 0)');
 });
 
-test('shows one disabled classroom script', async ({ page }) => {
+test('links the first classroom script when it is published', async ({ page }) => {
   await page.goto('./');
 
   await expect(page.locator('.meeting-dates')).toHaveCount(0);
-  await expect(page.locator('#scripts .section-kicker')).toHaveText('Documentation');
+  await expect(page.locator('#schedule .section-kicker')).toHaveText('Documentation');
   await expect(page.locator('#scripts-title')).toHaveText('Classroom scripts');
-  await expect(page.locator('#scripts .section-intro')).toHaveText(
+  await expect(page.locator('#schedule .section-intro')).toHaveText(
     'All of the materials we cover will be made available after class.'
   );
   await expect(page.locator('.script-card')).toHaveCount(1);
-  await expect(page.locator('.script-card')).toHaveAttribute('aria-disabled', 'true');
+  await expect(page.locator('.script-card')).toHaveAttribute(
+    'href',
+    `${basePath}/weeks/week-1/`
+  );
   await expect(page.locator('.script-card h3')).toHaveText('Social science in a hurry');
   await expect(page.locator('.script-card p')).toHaveText('October 5, 2026');
-  await expect(page.locator('.script-card a')).toHaveCount(0);
-  await expect(page.locator('a[href*="/weeks/"]')).toHaveCount(0);
   const sections = page.locator('main > section');
   await expect(sections.nth((await sections.count()) - 1)).toHaveAttribute(
     'id',
-    'scripts'
+    'schedule'
   );
+});
+
+test('renders the published week one page', async ({ page }) => {
+  await page.goto('./weeks/week-1/');
+
+  await expect(page).toHaveTitle(
+    'Social science in a hurry | Truth-Telling 101: Artists Meet Data Journalism'
+  );
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'Social science in a hurry'
+  );
+  await expect(page.locator('.hero-title a')).toHaveAttribute('href', `${basePath}/`);
+  await expect(
+    page.locator('iframe[title="Social science in a hurry lecture deck"]')
+  ).toHaveCount(1);
+  await expect(page.getByRole('heading', { name: 'Homework' })).toBeVisible();
 });
 
 test('names the three booked guests without assigning dates', async ({ page }) => {

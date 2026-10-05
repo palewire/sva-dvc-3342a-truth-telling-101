@@ -1,15 +1,12 @@
 ---
 title: 'Social science in a hurry'
-summary: 'A first look at the database state of mind: define what a row represents, inspect fields, and ask answerable questions of a spreadsheet.'
+summary: 'How reporters turn numbers into news using a database state of mind'
 week: 1
 ---
 
-## Lecture deck
-
-The Week 1 lecture deck, **Social science in a hurry**, introduces the course's database state of mind and follows a data-driven story through six reporting steps.
-
 <iframe
-  src="https://palewi.re/docs/sva-dvc-3342a-slide-deck/lectures/social-science-in-a-hurry/"
+  class="lesson-deck"
+  src="https://palewi.re/docs/sva-dvc-3342a-slide-deck/lectures/social-science-in-a-hurry/?controls=1#/1"
   title="Social science in a hurry lecture deck"
   width="100%"
   height="600"
@@ -17,30 +14,23 @@ The Week 1 lecture deck, **Social science in a hurry**, introduces the course's 
   allowfullscreen
 ></iframe>
 
-[Open the lecture deck in a new tab](https://palewi.re/docs/sva-dvc-3342a-slide-deck/lectures/social-science-in-a-hurry/).
+<p class="deck-link">
+  <a href="https://palewi.re/docs/sva-dvc-3342a-slide-deck/lectures/social-science-in-a-hurry/">Open deck in a new tab</a>
+</p>
 
 ## Class outline
 
-1. **Kickoff** — Welcome and orient the room.
-2. **Introductions** — Everyone shares their name and why they signed up.
-3. **Lecture** — Social science in a hurry: how journalism uses data to investigate measurable questions.
-4. **Questions** — Discuss the lecture and clarify concepts.
-5. **Student survey** — Complete the [Truth-Telling 101 survey](https://docs.google.com/forms/d/e/1FAIpQLSezxoxpL94RRMh1B-kQ0Mq1m7TCsK1BIRviqesv3i3zh9YdfQ/viewform).
+1. **Kickoff**
+2. **Introductions**
+3. **Lecture**
+4. **Questions**
+5. **Student survey**
 6. **Break**
-7. **Spreadsheet example** — Work through a dataset together, beginning with what one row represents. Then inspect each column's meaning and data type, identify missing or inconsistent values, and develop a question that can be answered from each field. Choose an appropriate spreadsheet operation, calculate the answer, and explain what it does—and does not—tell us.
-8. **Homework** — Choose a small dataset and conduct a first-pass interview with it (assignment below).
-9. **Wrap-up** — Review takeaways and preview the next class.
+7. **Spreadsheet exercise**
+8. **Homework**
 
-## Homework: interview a dataset
+## Homework
 
-Before our next class, find a small, publicly available spreadsheet connected to a topic you care about. If you are unsure where to look, choose a dataset from a government open-data portal or ask me for a starting point.
-
-Bring the spreadsheet link or file and a short note that answers:
-
-1. **What does one row represent?** Write a sentence defining the unit represented by a row. Include the dataset's source, subject, place, and time period if those are available.
-2. **What do the columns mean?** Pick at least four columns. For each, record its name, your best explanation of its meaning, its data type (category/text, quantity, date/time, yes/no, or identifier), and anything unclear or inconsistent you noticed.
-3. **What can you ask?** Write three specific questions that the dataset could help answer. For each question, name the column or columns involved and the spreadsheet operation you would use (such as filter, sort, count, sum, average, or compare groups).
-4. **What did you find?** Use the spreadsheet to answer at least one of your questions. Write the result in a sentence that explains what was counted or measured.
-5. **What remains uncertain?** Note one limitation, possible source of error, or follow-up question you would want to investigate before treating the result as a finding.
-
-This is an exploratory exercise, not a polished story. A well-defined question and a careful explanation of what the data can—and cannot—show are more important than a surprising result.
+1. **Identify a measurable question.** Come up with a question based on something you've read in the news that can be answered with a number drawn from a dataset.
+2. **Locate data that can provide the answer.** Try to find a publicly accessible dataset that you could use to answer your measurable question or propose how you might collect the data yourself.
+3. **Prepare to present.** Next week you'll be asked to share your question and dataset with the whole class. Be ready.
