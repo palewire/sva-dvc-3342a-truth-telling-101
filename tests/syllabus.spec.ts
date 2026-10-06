@@ -96,7 +96,7 @@ test('shows the SVA course facts without artwork in the hero', async ({ page }) 
   await expect(page.locator('.hero')).toContainText('Oct. 5–Nov. 9, 2026');
   await expect(page.locator('.hero')).toContainText('6:30–9:30 p.m.');
   const location = page.locator('.hero-meta-item').filter({ hasText: 'Location' });
-  await expect(location.locator('strong')).toHaveText('214 E. 21 Street');
+  await expect(location.locator('strong')).toHaveText('214 E. 21st Street');
   await expect(location.locator('span').last()).toHaveText('Room 305A');
   await expect(page.locator('.hero')).toContainText('Ben Welsh');
   await expect(page.locator('.hero img, .hero svg, .hero canvas')).toHaveCount(0);
