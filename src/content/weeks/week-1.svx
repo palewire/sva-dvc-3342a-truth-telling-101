@@ -31,6 +31,6 @@ week: 1
 
 ## Homework
 
-1. **Identify a measurable question.** Come up with a question based on something you've read in the news that can be answered with a number drawn from a dataset.
+1. **Identify a measurable question.** Come up with a question based on something in the news that can be answered with a number. Try to think of something that would hold a public figure or institution accountable to a promise, law or moral standard.
 2. **Locate data that can provide the answer.** Try to find a publicly accessible dataset that you could use to answer your measurable question or propose how you might collect the data yourself.
 3. **Prepare to present.** Next week, you will be asked to share your question and dataset with the whole class. Be ready.
