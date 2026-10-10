@@ -1,0 +1,275 @@
+---
+title: 'Interviewing the Data'
+summary: 'Sort, filter and pivot a real NYC civic dataset in Google Sheets — and learn what it still cannot tell you'
+week: 2
+---
+
+<script>
+  import Screenshot from '$lib/components/Screenshot.svelte';
+</script>
+
+Last week was the overview: the data-journalism workflow runs from a measurable question, to finding or preparing data that can answer it, to analysis, verification and a subject's response, and finally to a pitch. Tonight you do the first hands-on leg of that loop yourself, in Google Sheets, with a real civic dataset that a professional newsroom used for a story that ran a few months ago.
+
+## Part 1: A story built from one spreadsheet
+
+In July, Gothamist/WNYC reporter David Brand published ["More than 8K NYC renters evicted so far this year, as affordability crisis grows"](https://gothamist.com/news/more-than-8k-nyc-renters-evicted-so-far-this-year-as-affordability-crisis-grows). Here's what it found:
+
+- **17,791 households** were evicted citywide in 2025, the highest total since 2018.
+- In the first half of 2026, more than **8,000 households** were evicted, averaging **1,345 a month**, down from 1,514 a month over the same period in 2025.
+- It tied the increase to a spike in **NYC Marshal income**: more than $55 million gross in 2025, up from roughly $37 million in each of the two prior years, according to data from the city's Department of Investigation.
+- It cited **Eviction Lab**'s count of 112,000 eviction *cases filed* over the past year, about 5% of renter households. That's a larger, different number than the marshal-executed count you'll work with tonight, since most filings never reach execution.
+- The centerpiece was a column chart, "Thousands of New Yorkers are evicted each year," showing monthly executed evictions from 2018 through 2026: a cliff during the 2020–2021 statewide eviction moratorium, then a rebound to pre-pandemic levels that has held since.
+
+Tonight's class rebuilds that chart yourself, from the same public file, using the same two moves behind it: grouping records by month, and comparing year-over-year monthly averages. Those are the exact moves anyone would need to update this story today.
+
+We won't attempt everything in the article. The marshal-income analysis needs a separate Department of Investigation dataset that's out of scope tonight, and the Eviction Lab filings comparison draws on a different, non-city data source that measures *filed* cases rather than *executed* ones. Conflating the two would be a mistake — one worth naming out loud, since it's a trap anyone working with this data could fall into.
+
+By the end of tonight, you should be able to sort, filter and pivot a real civic dataset in Google Sheets, answer a concrete question about your own neighborhood, and — just as important — say out loud what the dataset can't tell you.
+
+## Part 2: Meet the dataset
+
+Tonight's dataset is [NYC Open Data's Evictions dataset](https://data.cityofnewyork.us/City-Government/Evictions/6z8x-wfk4), compiled from NYC Marshal and Department of Investigation filings. It has 135,270 rows covering 2017 to the present, and it's updated daily. The columns that matter tonight are `Eviction Address`, `Eviction Apartment Number`, `Executed Date`, `Borough`, `Eviction Postcode`, `Residential/Commercial`, `Latitude`, `Longitude`, `Community Board`, `Council District`, `Census Tract`, `BIN`, `BBL` and `NTA`.
+
+We picked this dataset for a few reasons. It's building-level, identified by `BBL` and `BIN` rather than just a borough name. It's current. It's a manageable size even across its full history, well within what Sheets handles comfortably. And, importantly, it has a well-documented, journalistically real flaw baked into it, which we'll get to in a moment.
+
+We're working with the whole dataset tonight, not a slice: all 135,270 rows, 2017 to the present, so you can see the full history in one file and filter down to whatever window a question needs, whether that's your own zip code, the last year, or a single month. Here's the citywide breakdown by borough, pulled live the week of Oct. 10, 2026:
+
+| Borough | Evictions |
+|---|---:|
+| Bronx | 42,889 |
+| Brooklyn | 37,653 |
+| Queens | 27,571 |
+| Manhattan | 22,280 |
+| Staten Island | 4,877 |
+| **Total** | **135,270** |
+
+### The scope flaw
+
+NYC's own documentation says this dataset counts only evictions a City Marshal actually *executed*. It does not include eviction cases that were filed but settled or withdrawn before a marshal arrived, informal "cash for keys" departures, or illegal lockouts. Housing advocates argue these outnumber executed cases. In other words, this dataset measures the *end* of a much larger, mostly invisible process.
+
+### The geocoding gap
+
+This one you can measure yourself: of all 135,270 evictions, **11,983 (about 8.9%)** have no latitude or longitude at all. Any map or neighborhood count you build from this data is already missing real evictions before you ask a single question, and that gap isn't necessarily spread evenly across boroughs. That's an open question tonight raises but doesn't resolve.
+
+## Part 3: Get the data onto your machine
+
+### Download the full CSV
+
+Open the [Evictions dataset page](https://data.cityofnewyork.us/City-Government/Evictions/6z8x-wfk4) on NYC Open Data. Click the "Export" button, then choose "CSV." You don't need to apply any filter first — grab the whole dataset. Save it somewhere you can find it again, like your Downloads folder.
+
+<Screenshot
+  src="/screenshots/week-2/nyc-open-data-export.png"
+  alt="NYC Open Data Evictions dataset page with the Export button open and CSV option visible"
+  chromeTitle="NYC Open Data"
+  chromeUrl="https://data.cityofnewyork.us/City-Government/Evictions/6z8x-wfk4"
+/>
+
+This is the exact same public file a professional newsroom would pull. No special access, no API key, just a browser and a few clicks.
+
+### Import it into Google Sheets
+
+Open a new Google Sheet and name it something like `NYC Evictions Analysis`. Rename "Sheet1" to `Evictions_raw`.
+
+Go to "File" → "Import" → "Upload," drag in the CSV you just downloaded, choose "Replace current sheet" (or "Insert new sheet" if you'd rather keep the original separate), and click "Import data."
+
+<Screenshot
+  src="/screenshots/week-2/sheets-import-dialog.png"
+  alt="Google Sheets import dialog with the downloaded evictions CSV ready to import"
+  showChrome={false}
+/>
+
+Rename this tab (or make a copy of it) `Evictions_working`, and do all further work there. Keeping a `_raw` tab untouched means you can always start over if something goes sideways.
+
+<Screenshot
+  src="/screenshots/week-2/sheets-renamed-tabs.png"
+  alt="Google Sheets tab bar showing Evictions_raw and Evictions_working tabs"
+  showChrome={false}
+/>
+
+### Ask questions before you analyze
+
+Before anyone sorts, filters or pivots anything, spend 10 to 15 minutes as a class interrogating the file, column by column:
+
+- How many rows are there? What is *one row*? One eviction? One household? One person?
+- What are the different ways this file says "where" (`Borough`, `Eviction Postcode`, `Latitude`/`Longitude`, `BIN`, `BBL`)? Why so many?
+- What's missing, and where does it cluster? Scroll and look for blank cells together.
+- What's the earliest and latest `Executed Date`? Does that match what you'd expect?
+- Who collected this, and why? A Marshal filing required paperwork. It wasn't collected by a reporter, or a researcher.
+
+Don't resolve anything yet. Just catalog what you notice on a whiteboard or shared doc. You'll come back to this habit in your homework.
+
+## Part 4: Sort and filter like a reporter
+
+### Sort by date
+
+Select the data range, then go to "Data" → "Sort range" → "Advanced range sorting options." Sort by `Executed Date`, A to Z.
+
+<Screenshot
+  src="/screenshots/week-2/sheets-sort-dialog.png"
+  alt="Google Sheets Advanced range sorting options dialog set to sort by Executed Date"
+  showChrome={false}
+/>
+
+Scroll through the result. Does the volume look steady across the year, or clustered?
+
+### Sort by borough
+
+Re-sort, this time by `BOROUGH`, A to Z. Notice which borough has the most rows just by scrolling the size of each block. The Bronx will visibly dominate.
+
+### Turn on filters
+
+Select the header row plus the data, then go to "Data" → "Create a filter." New dropdown arrows should appear on every column header.
+
+<Screenshot
+  src="/screenshots/week-2/sheets-filters-enabled.png"
+  alt="Google Sheets header row showing filter dropdown arrows after enabling Create a filter"
+  showChrome={false}
+/>
+
+### Filter to residential evictions
+
+Click the filter dropdown on `Residential/Commercial`. Uncheck "Commercial," leaving only "Residential" checked.
+
+<Screenshot
+  src="/screenshots/week-2/sheets-filter-residential.png"
+  alt="Google Sheets filter dropdown with Commercial unchecked and only Residential selected"
+  showChrome={false}
+/>
+
+Check the new row count in the bottom-right corner of the sheet.
+
+### Filter to a single zip code
+
+Click the filter dropdown on `Eviction Postcode`. Use the search box to type a single zip code, picking one with a visible count, like `10457`. This is the same move you'll make later for your own neighborhood. Once you've seen it work, clear this filter before moving on, but keep the Residential-only filter active.
+
+## Part 5: Pivot tables and the citywide trend
+
+### Build your first pivot table
+
+Select the full data range, then go to "Insert" → "Pivot table" → "New sheet." Name the new tab `Pivot_borough`.
+
+In the pivot table editor, add `BOROUGH` under "Rows," and add `Executed Date` under "Values," summarized by `COUNTA`.
+
+<Screenshot
+  src="/screenshots/week-2/sheets-pivot-borough.png"
+  alt="Google Sheets pivot table editor with Borough as rows and a COUNTA of Executed Date as values"
+  showChrome={false}
+/>
+
+The result is one count per borough. Compare it to the citywide breakdown from Part 2. Does your pivot match?
+
+### Turn dates into months
+
+Deriving a reusable grouping key with a formula is a core data-journalism move, and it lets us recreate the exact shape Gothamist published, from data already in hand. Because the full dataset is loaded, not a slice, this chart should reproduce the entire 2017–2026 shape from the article, pandemic cliff included.
+
+In `Evictions_working`, add a header in the first empty column (for example, column R): `Month`. In the first data row of that column, enter:
+
+```
+=TEXT(E2,"YYYY-MM")
+```
+
+Adjust `E2` if `Executed Date` isn't column E on your sheet. Select the cell, then double-click the fill handle in its bottom-right corner to fill the formula down to the last row.
+
+<Screenshot
+  src="/screenshots/week-2/sheets-month-formula.png"
+  alt="Google Sheets Month column showing the TEXT formula applied and filled down"
+  showChrome={false}
+/>
+
+Build a pivot with `Month` under "Rows" and a `COUNTA` of any column (such as `Executed Date`) under "Values." It should already sort ascending, since `Month` is a sortable text string and `"2026-07"` is less than `"2026-08"`.
+
+Select the pivot output, then go to "Insert" → "Chart" and choose a column chart.
+
+<Screenshot
+  src="/screenshots/week-2/sheets-trend-chart.png"
+  alt="Google Sheets column chart of monthly eviction counts from 2017 through 2026"
+  showChrome={false}
+/>
+
+Compare the shape to Gothamist's published chart, "Thousands of New Yorkers are evicted each year": a sharp drop to near-zero through 2020–2021, the statewide eviction moratorium, a steady climb back starting in 2022, and a bumpy plateau since. Does your recreated chart match?
+
+### Check what has happened since the story ran
+
+The article was published July 6, 2026, reporting a January–June 2026 average of 1,345 evictions a month. Scroll to the most recent bars. Pulled live the week of Oct. 10, 2026:
+
+| Month | Evictions |
+|---|---:|
+| Jul 2026 | 1,530 |
+| Aug 2026 | 1,488 |
+| Sep 2026 | 1,640 |
+| Oct 2026 (partial — only 9 days in) | 385 |
+
+Has the trend kept climbing, flattened, or reversed since the story ran? September's 1,640 sits near 2026's monthly highs, with no sign of reversal as of this pull.
+
+Flag the October bar as a trap before anyone reacts to it. The number 385 looks like a one-month crash, but the month is only nine days old. Comparing a partial month to full months without normalizing is exactly the kind of mistake this course exists to prevent.
+
+### A second, subtler flaw
+
+Pivot just January through June 2026, and average the six monthly counts. Pulled live, it comes to about **1,508 a month**, noticeably higher than the 1,345 a month Gothamist reported while the story was live.
+
+This isn't an error in either number. City Limits has documented that the Department of Investigation's database only updates after a marshal reports an eviction, which can take days or weeks, so the same month's count keeps growing for months after the month ends, as late filings arrive. Which number is "right"? Neither, fully. "As of when you pulled it" is now a detail every story built on this dataset has to disclose.
+
+### Drill the pivot to your own zip code
+
+In the pivot editor from "Build your first pivot table" (or a fresh copy), change "Rows" from `BOROUGH` to `Eviction Postcode`.
+
+Add a filter on `Executed Date`, restricted to the last 12 months. The full dataset is loaded, so without this filter the zip counts would span all nine years, not "how does my neighborhood look right now."
+
+Add a second filter on `BOROUGH`, set to one borough (for example, the Bronx), to keep the list manageable.
+
+<Screenshot
+  src="/screenshots/week-2/sheets-pivot-zip-drill.png"
+  alt="Google Sheets pivot table with Eviction Postcode as rows, filtered to one borough and the last 12 months"
+  showChrome={false}
+/>
+
+The result is a zip-level count within one borough, for the last year. That's the building block for your in-class exercise.
+
+## Part 6: Make the motion yours
+
+### Repeat it once more
+
+Repeat the sort → filter → pivot motion once more, on a cut of your own choosing. Pivot by month (`Executed Date`) to look for seasonality, or compare Residential versus Commercial counts side by side. The goal is for this motion to become a reusable habit, not a one-off you only saw demonstrated.
+
+### Your own neighborhood
+
+Starting from the zip-code pivot you just built, which already has `Executed Date` filtered to the last 12 months, filter `Eviction Postcode` to your own zip code. Or, working directly in `Evictions_working`, filter both `Executed Date` (last 12 months) and search `Eviction Address` for your block.
+
+Answer in writing:
+
+- How many evictions here in the last year?
+- Residential or commercial?
+- Trending up or down month to month?
+- Does the number feel high, low, or about right to you, and what would make your gut wrong?
+
+## Homework Assignments
+
+### Task 1: Choose and interrogate a dataset
+
+Pick one dataset that interests you. Any topic, any source, any city, or none at all. It doesn't need to be about evictions, and it doesn't need to come from NYC Open Data. A short list of options is below if you want a starting point, but picking something else entirely is encouraged.
+
+Ask it the same five questions from Part 3:
+
+- How many rows? What is *one row*?
+- What are the different ways (if any) this data says "where," "who" and "when"?
+- What's missing, and where does it cluster?
+- What's the earliest and latest date in the data? Does that match what you'd expect?
+- Who collected this, and why?
+
+### Task 2: Diagnose its strengths and weaknesses
+
+From those answers, identify one genuine strength and one genuine weakness of the dataset. Not a complaint about a tool, but something real about what this data can and can't support as evidence.
+
+### Task 3: Present it next week
+
+Be ready to give a short, informal presentation in Week 3: what the dataset is, what the five questions turned up, and the strength and weakness you landed on.
+
+Here are a few optional starting points, all from NYC Open Data, each with its own flaw worth hunting for:
+
+| Dataset | Size | Geo fields | The flaw |
+|---|---:|---|---|
+| [Restaurant Inspection Results](https://data.cityofnewyork.us/Health/DOHMH-New-York-City-Restaurant-Inspection-Results/43nn-pn8j) | 296,623 rows | Building/Street/Zip, Lat/Long, BIN, BBL | One row is one *violation*, not one restaurant. A place with 5 violations appears 5 times. Counting rows naively manufactures a fake restaurant-safety crisis. |
+| [Rodent Inspection](https://data.cityofnewyork.us/Health/Rodent-Inspection/p937-wjvj) | ~3.1 million rows (filter to one recent year) | Borough, Lat/Long, Community Board | DOHMH's own documentation says absence from this dataset doesn't mean absence of rats, only that nobody called 311 or an inspector hasn't been there yet. High counts can mean more rats, or more complaining neighbors. |
+| [Motor Vehicle Collisions – Crashes](https://data.cityofnewyork.us/Public-Safety/Motor-Vehicle-Collisions-Crashes/h9gi-nx95) | 86,516 in the last 12 months | Borough, Zip, Lat/Long | `Contributing Factor` and `Vehicle Type` are self-reported by officers on scene and are blank or "Unspecified" extremely often. The most story-relevant columns are the least reliable. |
+| [Street Pothole Work Orders – Closed](https://data.cityofnewyork.us/Transportation/Street-Pothole-Work-Orders-Closed-Dataset/x9wy-ing4) | 411,745 rows | Street-segment line geometry plus address fields, no lat/long points | Location is a street segment, not a point, so "localize to your block" is harder than it looks. `InitBy` and `Source` are undocumented codes with no definition on the dataset page, a direct "who collected this and why" trap. About 162,000 rows have no house number. |
+| [Affordable Housing Production by Building](https://data.cityofnewyork.us/Housing-Development/Affordable-Housing-Production-by-Building/hg8x-zxpr) | 9,551 rows | House Number/Street, Borough, Zip, BBL, BIN, Community Board, Census Tract, NTA, Lat/Long | About 1,949 rows have the project name, and often the address, redacted as "CONFIDENTIAL." About 1,958 rows have no coordinates. The same building can appear more than once across projects, and a "Preservation" project can mean zero construction, just extended rent restrictions on an existing building. |
