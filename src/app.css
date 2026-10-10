@@ -770,6 +770,109 @@ h3 {
   color: var(--sva-red);
 }
 
+.week-body ul,
+.week-body ol {
+  margin-left: 0;
+  padding-left: 1.5em;
+  margin-bottom: 16px;
+  list-style-position: outside;
+}
+
+.week-body li {
+  margin-left: 0;
+  padding-left: 0;
+}
+
+/* Inline code (not in pre blocks) */
+.week-body code {
+  background: var(--surface);
+  padding: 0.15rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.95em;
+}
+
+/* Code blocks - Shiki provides the background via inline styles */
+.week-body pre {
+  padding: 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin-left: 0;
+  margin-bottom: 16px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+/* Reset inline code styles when inside pre (Shiki handles it) */
+.week-body pre code {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  font-size: inherit;
+}
+
+/* Shiki .line styling for proper line-height */
+.week-body .shiki .line {
+  line-height: 1.6;
+}
+
+/* Highlighted lines in code blocks */
+.week-body .shiki .line.highlighted {
+  background-color: rgba(255, 255, 255, 0.1);
+  margin: 0 -16px;
+  padding: 0 16px;
+  display: inline-block;
+  width: calc(100% + 32px);
+}
+
+/* Ensure empty highlighted lines still render */
+.week-body .shiki .line.highlighted:empty::before {
+  content: ' ';
+}
+
+/* Copy button */
+.week-body .code-block {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.week-body .code-block pre {
+  margin-bottom: 0;
+}
+
+.week-body .copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 0.2rem 0.6rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--rule);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.week-body .copy-btn:focus-visible {
+  outline: 2px solid var(--sva-red);
+  outline-offset: 2px;
+}
+
+.week-body .code-block:hover .copy-btn,
+.week-body .code-block:focus-within .copy-btn {
+  opacity: 1;
+}
+
+.week-body .copy-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--white);
+}
+
 a:hover,
 a:focus-visible {
   color: var(--link-interaction);
