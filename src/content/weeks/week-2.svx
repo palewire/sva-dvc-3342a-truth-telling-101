@@ -166,133 +166,95 @@ Moments later, your blank sheet should be replaced by the full dataset.
   imgHeight={2072}
 />
 
+Now, before we start working with the data, we want to turn on a control interface that will empower the row at the top of the sheet to manipulate the data. You should do this by making sure the first row of the sheet is selected, clicking on the "Data" menu, and selecting "Create a filter."
+
+<Screenshot
+  src="/screenshots/week-2/sheets-create-filter-menu.png"
+  alt="Google Sheets Data menu open with Create a filter highlighted"
+  showChrome={false}
+  imgWidth={2772}
+  imgHeight={2072}
+/>
+
+Once you do that, you should see a new pulldown menu on every column header.
+
+<Screenshot
+  src="/screenshots/week-2/sheets-filter-dropdowns.png"
+  alt="Google Sheets with filter dropdown arrows on every column header, one open showing Residential and Commercial options"
+  showChrome={false}
+  imgWidth={2772}
+  imgHeight={2072}
+/>
+
 That's it. You're strapped in and ready to start the interview.
 
 ## Part 4: First date questions
 
-Before anyone sorts, filters or pivots anything, spend 10 to 15 minutes as a class interrogating the file, column by column:
+ We need to get to know our dataset. Before we get too pointed in our questioning, we need to spend some time getting to know each other. Just like a human subject, it's helpful to spend time establishing common ground, to ask basic questions, to gain a deeper understanding.
 
-- How many rows are there? Does it match what we expect?
-- What's the earliest and latest `Executed Date`? Does that match what we expect?
+ You can do that by keeping it simple. Here are five questions to start with, which we can answer simply by scrolling through the data, or using the filter and sorting controls.
 
-### Filter to residential evictions
+- How many rows are in the spreadsheet? Does it match what we expect?
+- What is the earliest and latest dates in the data? Does that match what we expect?
+- What is each column trying to record?
+- What are the unique values in each column? What type of data do they store?
+- Where do we see empty cells? Do those have any pattern or significance?
 
-Click the filter dropdown on `Residential/Commercial`. Uncheck "Commercial," leaving only "Residential" checked.
+## Part 5: Pivot tables FTW
 
-<Screenshot
-  src="/screenshots/week-2/sheets-filter-residential.png"
-  alt="Google Sheets filter dropdown with Commercial unchecked and only Residential selected"
-  showChrome={false}
-/>
-
-Check the new row count in the bottom-right corner of the sheet.
-
-## Part 5: Pivot tables and the citywide trend
-
-### Build your first pivot table
-
-Select the full data range, then go to "Insert" → "Pivot table" → "New sheet." Name the new tab `Pivot_borough`.
+Select the full data range, then go to "Insert" → "Pivot table" → "New sheet."
 
 In the pivot table editor, add `BOROUGH` under "Rows," and add `Executed Date` under "Values," summarized by `COUNTA`.
 
 <Screenshot
   src="/screenshots/week-2/sheets-pivot-borough.png"
-  alt="Google Sheets pivot table editor with Borough as rows and a COUNTA of Executed Date as values"
+  alt="Google Sheets pivot table editor with Borough as rows and a COUNTA value, showing counts by borough"
   showChrome={false}
+  imgWidth={2772}
+  imgHeight={2072}
 />
-
-The result is one count per borough. Compare it to the citywide breakdown from Part 2. Does your pivot match?
 
 ### Turn dates into months
 
-Deriving a reusable grouping key with a formula is a core data-journalism move, and it lets us recreate the exact shape Gothamist published, from data already in hand. Because the full dataset is loaded, not a slice, this chart should reproduce the entire 2017–2026 shape from the article, pandemic cliff included.
-
-In `Evictions_working`, add a header in the first empty column (for example, column R): `Month`. In the first data row of that column, enter:
-
-```
-=TEXT(E2,"YYYY-MM")
-```
-
-Adjust `E2` if `Executed Date` isn't column E on your sheet. Select the cell, then double-click the fill handle in its bottom-right corner to fill the formula down to the last row.
+TK
 
 <Screenshot
-  src="/screenshots/week-2/sheets-month-formula.png"
-  alt="Google Sheets Month column showing the TEXT formula applied and filled down"
+  src="/screenshots/week-2/sheets-pivot-month.png"
+  alt="Google Sheets pivot table grouped by Executed Date year and month, showing yearly and monthly eviction totals"
   showChrome={false}
+  imgWidth={2772}
+  imgHeight={2072}
 />
 
-Build a pivot with `Month` under "Rows" and a `COUNTA` of any column (such as `Executed Date`) under "Values." It should already sort ascending, since `Month` is a sortable text string and `"2026-07"` is less than `"2026-08"`.
-
-Select the pivot output, then go to "Insert" → "Chart" and choose a column chart.
+TK
 
 <Screenshot
-  src="/screenshots/week-2/sheets-trend-chart.png"
-  alt="Google Sheets column chart of monthly eviction counts from 2017 through 2026"
+  src="/screenshots/week-2/sheets-residential-filter.png"
+  alt="Google Sheets pivot table editor with a Residential/Commercial filter in the Filters section"
   showChrome={false}
+  imgWidth={2772}
+  imgHeight={2072}
 />
 
-Compare the shape to Gothamist's published chart, "Thousands of New Yorkers are evicted each year": a sharp drop to near-zero through 2020–2021, the statewide eviction moratorium, a steady climb back starting in 2022, and a bumpy plateau since. Does your recreated chart match?
+Compare to the Gothamist chart.
 
-### Check what has happened since the story ran
+## Part 6: Do it yourself, for your neighborhood
 
-The article was published July 6, 2026, reporting a January–June 2026 average of 1,345 evictions a month. Scroll to the most recent bars. Pulled live the week of Oct. 10, 2026:
+Filter to the ZIP Code where you live and answer the following questions.
 
-| Month | Evictions |
-|---|---:|
-| Jul 2026 | 1,530 |
-| Aug 2026 | 1,488 |
-| Sep 2026 | 1,640 |
-| Oct 2026 (partial — only 9 days in) | 385 |
+- How do residential evictions this year compare to last year?
+- How do residential evictions this year compare to before COVID?
+- Has there been an eviction in the building where you live?
 
-Has the trend kept climbing, flattened, or reversed since the story ran? September's 1,640 sits near 2026's monthly highs, with no sign of reversal as of this pull.
+## Part 7: The catch
 
-Flag the October bar as a trap before anyone reacts to it. The number 385 looks like a one-month crash, but the month is only nine days old. Comparing a partial month to full months without normalizing is exactly the kind of mistake this course exists to prevent.
-
-### A second, subtler flaw
-
-Pivot just January through June 2026, and average the six monthly counts. Pulled live, it comes to about **1,508 a month**, noticeably higher than the 1,345 a month Gothamist reported while the story was live.
-
-This isn't an error in either number. City Limits has documented that the Department of Investigation's database only updates after a marshal reports an eviction, which can take days or weeks, so the same month's count keeps growing for months after the month ends, as late filings arrive. Which number is "right"? Neither, fully. "As of when you pulled it" is now a detail every story built on this dataset has to disclose.
-
-### Drill the pivot to your own zip code
-
-In the pivot editor from "Build your first pivot table" (or a fresh copy), change "Rows" from `BOROUGH` to `Eviction Postcode`.
-
-Add a filter on `Executed Date`, restricted to the last 12 months. The full dataset is loaded, so without this filter the zip counts would span all nine years, not "how does my neighborhood look right now."
-
-Add a second filter on `BOROUGH`, set to one borough (for example, the Bronx), to keep the list manageable.
-
-<Screenshot
-  src="/screenshots/week-2/sheets-pivot-zip-drill.png"
-  alt="Google Sheets pivot table with Eviction Postcode as rows, filtered to one borough and the last 12 months"
-  showChrome={false}
-/>
-
-The result is a zip-level count within one borough, for the last year. That's the building block for your in-class exercise.
-
-## Part 6: Make the motion yours
-
-### Repeat it once more
-
-Repeat the sort → filter → pivot motion once more, on a cut of your own choosing. Pivot by month (`Executed Date`) to look for seasonality, or compare Residential versus Commercial counts side by side. The goal is for this motion to become a reusable habit, not a one-off you only saw demonstrated.
-
-### Your own neighborhood
-
-Starting from the zip-code pivot you just built, which already has `Executed Date` filtered to the last 12 months, filter `Eviction Postcode` to your own zip code. Or, working directly in `Evictions_working`, filter both `Executed Date` (last 12 months) and search `Eviction Address` for your block.
-
-Answer in writing:
-
-- How many evictions here in the last year?
-- Residential or commercial?
-- Trending up or down month to month?
-- Does the number feel high, low, or about right to you, and what would make your gut wrong?
+David Brand told me something interesting. There are duplicates in the data. He didn't find it through data analysis or careful interview of his data. He found it by talking to human sources.
 
 ## Homework Assignments
 
 ### Task 1: Interview a different dataset
 
 Pick one dataset that interests you. Any topic, any source, any city, or none at all. It doesn't need to be about evictions, and it doesn't need to come from NYC Open Data. A short list of options is below if you want a starting point, but picking something else entirely is encouraged.
-
 
 Here are a few optional starting points, all from NYC Open Data, each with its own flaw worth hunting for:
 
