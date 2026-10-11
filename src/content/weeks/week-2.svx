@@ -1,5 +1,5 @@
 ---
-title: 'Interviewing Data'
+title: 'Interviewing data'
 summary: 'How journalists use spreadsheets to ask and answer questions'
 week: 2
 ---
@@ -9,11 +9,11 @@ week: 2
   import Screenshot from '$lib/components/Screenshot.svelte';
 </script>
 
-In [week one](../week-1), we discussed data journalism at a high level, covering the broad principles that guide the work. Now it's time to get hands-on and see how those ideas can be applied to a real dataset.
+In [week one](../week-1), we discussed data journalism at a high level, covering the broad principles that guide the work. Now it's time to get hands-on and see how those ideas can be applied to a real story, using a real dataset.
 
 ## Part 1: Tonight's role model
 
-We will use a July 2026 story published by Gothamist as our guide. Authored by the public media outlet's housing reporter, [David Brand](https://gothamist.com/staff/david-brand), it's headlined: ["More than 8K NYC renters evicted so far this year, as affordability crisis grows."](https://gothamist.com/news/more-than-8k-nyc-renters-evicted-so-far-this-year-as-affordability-crisis-grows)
+We will use a July 2026 piece published by Gothamist as our guide. Authored by the public media outlet's housing reporter, [David Brand](https://gothamist.com/staff/david-brand), it's headlined: ["More than 8K NYC renters evicted so far this year, as affordability crisis grows."](https://gothamist.com/news/more-than-8k-nyc-renters-evicted-so-far-this-year-as-affordability-crisis-grows)
 
 <Screenshot
   src="/screenshots/week-2/gothamist-evictions-article.png"
@@ -24,19 +24,33 @@ We will use a July 2026 story published by Gothamist as our guide. Authored by t
   imgHeight={2072}
 />
 
-His story landed six months after the inauguration of Mayor Zohran Mamdani, a long-shot candidate who electrified voters with an energetic campaign focused on lowering the cost of living for renters and low-income New Yorkers.
+His story landed soon after the inauguration of Mayor Zohran Mamdani, a long-shot candidate who electrified voters with an energetic campaign focused on lowering the cost of living for renters and low-income New Yorkers.
 
-Among other findings, Brand reported that "New York City marshals completed an average of 1,345 evictions per month from January to June, approaching the rate of removals from the years prior to the COVID-19 pandemic and a temporary halt on evictions."
+But it wasn't a new topic for Brand, who has been tracking eviction data closely since the pandemic, when a statewide moratorium temporarily brought removals to a halt.
 
-While it may be too soon to judge the new mayor's impact, for Mamdani to claim success, numbers like that will need to go down in the coming years. Brand's story provided a clear measuring stick for where the new mayor is starting off.
+"Every six months or so I revisit the data to see trends," Brand told me in an interview about his work. "We see that the eviction totals are pretty similar to prior to COVID. Knowing that it was approaching or surpassing that number, I knew there would be a story."
+
+And so there was.
+
+The cornerstone of the piece was his finding that "New York City marshals completed an average of 1,345 evictions per month from January to June, approaching the rate of removals from the years prior to the COVID-19 pandemic."
 
 And he did more than dump the data. Brand brought in expert sources to explain how the eviction process works, and what early steps the new administration is taking to address the issue.
+
+"I try to talk to landlords, representatives for landlords, tenants' rights people and housing policy people," Brand said. "I'm always trying to bring context."
+
+While it may be too soon to judge the new mayor's impact, for Mamdani to claim his policies are a success, numbers like that will need to go down. Brand is ready to apply his measuring stick again when it's time to start evaluating the mayor's performance.
+
+"Since a lot of these cases can take nearly a year to wind to a final eviction order, I think it should be time to start looking at Mamdani at the one year mark," Brand said.
 
 In today's class, we will follow in his footsteps, recreating the Gothamist analysis from scratch.
 
 Then we'll update it to include the data that's been released since the story came out, and see if there are any signs of a shift.
 
-Finally, you'll be asked to investigate evictions in your own neighborhood, as you take your first steps into developing data journalism of your own.
+Finally, you'll be asked to investigate evictions in your own neighborhood, as you take your first steps towards developing data journalism of your own.
+
+We'll do all that using Google Sheets, the same free spreadsheet tool that Brand used for his analysis. No fancy programming language or LLM tokens are required to do quality work.
+
+"There's a lot you can do with Google Sheets," Brand said. "You can start small and it gives you the foundation. Start and you'll learn gradually."
 
 ## Part 2: Meet the dataset
 
