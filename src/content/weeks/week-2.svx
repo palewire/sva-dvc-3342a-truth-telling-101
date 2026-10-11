@@ -1,6 +1,6 @@
 ---
-title: 'Interviewing the Data'
-summary: 'Sort, filter and pivot a real NYC civic dataset in Google Sheets — and learn what it still cannot tell you'
+title: 'Interviewing Data'
+summary: 'How journalists use spreadsheets to ask and answer questions'
 week: 2
 ---
 
@@ -8,25 +8,43 @@ week: 2
   import Screenshot from '$lib/components/Screenshot.svelte';
 </script>
 
-Last week was the overview: the data-journalism workflow runs from a measurable question, to finding or preparing data that can answer it, to analysis, verification and a subject's response, and finally to a pitch. Tonight you do the first hands-on leg of that loop yourself, in Google Sheets, with a real civic dataset that a professional newsroom used for a story that ran a few months ago.
+In [week one](../week-1), we discussed data journalism at a high level, covering the broad principles that guide the work. Now it's time to get hands-on and see how those ideas can be applied to a real dataset.
 
-## Part 1: A story built from one spreadsheet
+## Part 1: Tonight's role model
 
-In July, Gothamist/WNYC reporter David Brand published ["More than 8K NYC renters evicted so far this year, as affordability crisis grows"](https://gothamist.com/news/more-than-8k-nyc-renters-evicted-so-far-this-year-as-affordability-crisis-grows). Here's what it found:
+We will use a July 2026 story published by Gothamist as our guide. Authored by the public media outlet's housing reporter, [David Brand](https://gothamist.com/staff/david-brand), it's headlined: ["More than 8K NYC renters evicted so far this year, as affordability crisis grows."](https://gothamist.com/news/more-than-8k-nyc-renters-evicted-so-far-this-year-as-affordability-crisis-grows)
 
-- **17,791 households** were evicted citywide in 2025, the highest total since 2018.
-- In the first half of 2026, more than **8,000 households** were evicted, averaging **1,345 a month**, down from 1,514 a month over the same period in 2025.
-- It tied the increase to a spike in **NYC Marshal income**: more than $55 million gross in 2025, up from roughly $37 million in each of the two prior years, according to data from the city's Department of Investigation.
-- It cited **Eviction Lab**'s count of 112,000 eviction *cases filed* over the past year, about 5% of renter households. That's a larger, different number than the marshal-executed count you'll work with tonight, since most filings never reach execution.
-- The centerpiece was a column chart, "Thousands of New Yorkers are evicted each year," showing monthly executed evictions from 2018 through 2026: a cliff during the 2020–2021 statewide eviction moratorium, then a rebound to pre-pandemic levels that has held since.
+<Screenshot
+  src="/screenshots/week-2/gothamist-evictions-article.png"
+  alt="Gothamist headline: More than 8K NYC renters evicted so far this year, as affordability crisis grows"
+  chromeTitle="Gothamist"
+  chromeUrl="https://gothamist.com/news/more-than-8k-nyc-renters-evicted-so-far-this-year-as-affordability-crisis-grows"
+  imgWidth={2490}
+  imgHeight={2072}
+/>
 
-Tonight's class rebuilds that chart yourself, from the same public file, using the same two moves behind it: grouping records by month, and comparing year-over-year monthly averages. Those are the exact moves anyone would need to update this story today.
+His story landed six months after the inauguration of Mayor Zohran Mamdani, a long-shot candidate who electrified voters with an energetic campaign focused on lowering the cost of living for renters and low-income New Yorkers.
 
-We won't attempt everything in the article. The marshal-income analysis needs a separate Department of Investigation dataset that's out of scope tonight, and the Eviction Lab filings comparison draws on a different, non-city data source that measures *filed* cases rather than *executed* ones. Conflating the two would be a mistake — one worth naming out loud, since it's a trap anyone working with this data could fall into.
+Among other findings, Brand reported that "New York City marshals completed an average of 1,345 evictions per month from January to June, approaching the rate of removals from the years prior to the COVID-19 pandemic and a temporary halt on evictions."
 
-By the end of tonight, you should be able to sort, filter and pivot a real civic dataset in Google Sheets, answer a concrete question about your own neighborhood, and — just as important — say out loud what the dataset can't tell you.
+While it may be too soon to judge the new mayor's impact, for Mamdani to claim success, numbers like that will need to go down in the coming years. Brand's story provided a clear measuring stick for where the new mayor is starting off.
+
+And he did more than dump the data. Brand brought in expert sources to explain how the eviction process works, and what early steps the new administration is taking to address the issue.
+
+In today's class, we will follow in his footsteps, recreating the Gothamist analysis from scratch.
+
+Then we'll update it to include the data that's been released since the story came out, and see if there are any signs of a shift.
+
+Finally, you'll be asked to investigate evictions in your own neighborhood, as you take your first steps into developing data journalism of your own.
 
 ## Part 2: Meet the dataset
+
+<Screenshot
+  src="/screenshots/week-2/nyc-open-data-evictions-dataset.png"
+  alt="NYC Open Data Evictions dataset page showing the About tab, update frequency and source agency"
+  chromeTitle="NYC Open Data"
+  chromeUrl="https://data.cityofnewyork.us/City-Government/Evictions/6z8x-wfk4"
+/>
 
 Tonight's dataset is [NYC Open Data's Evictions dataset](https://data.cityofnewyork.us/City-Government/Evictions/6z8x-wfk4), compiled from NYC Marshal and Department of Investigation filings. It has 135,270 rows covering 2017 to the present, and it's updated daily. The columns that matter tonight are `Eviction Address`, `Eviction Apartment Number`, `Executed Date`, `Borough`, `Eviction Postcode`, `Residential/Commercial`, `Latitude`, `Longitude`, `Community Board`, `Council District`, `Census Tract`, `BIN`, `BBL` and `NTA`.
 
