@@ -118,7 +118,7 @@ First, go to the "File" menu in the upper left and select "Import."
   imgHeight={2072}
 />
 
-The flip to the "Upload" tab, where you can drag and drop the file, or click "Browse" to select it from your computer's directory system.
+Then flip to the "Upload" tab, where you can drag and drop the file, or click "Browse" to select it from your computer's directory system.
 
 <Screenshot
   src="/screenshots/week-2/sheets-upload-tab.png"
@@ -140,7 +140,7 @@ Then you'll see this "Import File" dialog that asks you how Sheets should handle
   imgHeight={2072}
 />
 
-Since we're starting with a blank sheet and there's no pre-existing data to worry about, it's safe to stick with the "Replace spreadsheet" option. Because our data is in the standard comma-separated format, you can leave the default setting separator as well. Click "Import data."
+Since we're starting with a blank sheet and there's no pre-existing data to worry about, it's safe to stick with the "Replace spreadsheet" option. Because our data is in the standard comma-separated format, you can leave the default separator setting as well. Click "Import data."
 
 Moments later, your blank sheet should be replaced by the full dataset.
 
