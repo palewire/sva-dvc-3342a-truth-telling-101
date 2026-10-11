@@ -89,25 +89,92 @@ The file should soon appear in your computer's Downloads folder, or wherever you
 
 ## Part 3: Importing into Google Sheets
 
-Open a new Google Sheet and name it something like `NYC Evictions Analysis`. Rename "Sheet1" to `Evictions_raw`.
+For tonight's exercise, we'll be working in [Google Sheets](https://en.wikipedia.org/wiki/Google_Sheets). It's a free spreadsheet tool with all the standard features, plus the ability to share and collaborate over the web.
 
-Go to "File" → "Import" → "Upload," drag in the CSV you just downloaded, choose "Replace current sheet" (or "Insert new sheet" if you'd rather keep the original separate), and click "Import data."
-
-<Screenshot
-  src="/screenshots/week-2/sheets-import-dialog.png"
-  alt="Google Sheets import dialog with the downloaded evictions CSV ready to import"
-  showChrome={false}
-/>
-
-Rename this tab (or make a copy of it) `Evictions_working`, and do all further work there. Keeping a `_raw` tab untouched means you can always start over if something goes sideways.
+You should get started by visiting [drive.google.com](https://drive.google.com) and creating a new spreadsheet workbook. You do that by clicking "+ New" in the upper left, selecting "Sheets" and then "Blank spreadsheet."
 
 <Screenshot
-  src="/screenshots/week-2/sheets-renamed-tabs.png"
-  alt="Google Sheets tab bar showing Evictions_raw and Evictions_working tabs"
-  showChrome={false}
+  src="/screenshots/week-2/google-drive-new-sheet-menu.png"
+  alt="Google Drive New menu open, with Google Sheets submenu showing Blank spreadsheet option"
+  chromeTitle="Google Drive"
+  chromeUrl="https://drive.google.com/drive/u/4/my-drive"
+  imgWidth={2772}
+  imgHeight={2072}
 />
 
-### Ask questions before you analyze
+<Aside title="BYO Spreadsheet">
+  <p>There's no law that says you have to use Google Sheets to complete this exercise. You are welcome to use any spreadsheet tool you prefer, such as Microsoft Excel, LibreOffice Calc or Apple Numbers.</p>
+</Aside>
+
+Once you have your new spreadsheet, the next step is to import the CSV file you downloaded earlier.
+
+First, go to the "File" menu in the upper left and select "Import."
+
+<Screenshot
+  src="/screenshots/week-2/sheets-import-menu.png"
+  alt="Google Sheets File menu open with the Import option highlighted"
+  showChrome={false}
+  imgWidth={2772}
+  imgHeight={2072}
+/>
+
+The flip to the "Upload" tab, where you can drag and drop the file, or click "Browse" to select it from your computer's directory system.
+
+<Screenshot
+  src="/screenshots/week-2/sheets-upload-tab.png"
+  alt="Google Sheets import dialog on the Upload tab, with a drag-and-drop area and Browse button"
+  showChrome={false}
+  imgWidth={2772}
+  imgHeight={2072}
+/>
+
+Since it's nearly 30 megabytes of data, it may take the file a few moments to upload.
+
+Then you'll see this "Import File" dialog that asks you how Sheets should handle the import.
+
+<Screenshot
+  src="/screenshots/week-2/sheets-import-file-dialog.png"
+  alt="Google Sheets Import file dialog set to Replace spreadsheet with separator type Detect automatically"
+  showChrome={false}
+  imgWidth={2772}
+  imgHeight={2072}
+/>
+
+Since we're starting with a blank sheet and there's no pre-existing data to worry about, it's safe to stick with the "Replace spreadsheet" option. Because our data is in the standard comma-separated format, you can leave the default setting separator as well. Click "Import data."
+
+Moments later, your blank sheet should be replaced by the full dataset.
+
+<Screenshot
+  src="/screenshots/week-2/sheets-data-imported.png"
+  alt="Google Sheets populated with the full evictions dataset after import"
+  showChrome={false}
+  imgWidth={2772}
+  imgHeight={2072}
+/>
+
+Finally, go to the "Format" menu at the top and select "Convert to table." This will activate features that make sorting, filtering and analyzing the data easier.
+
+<Screenshot
+  src="/screenshots/week-2/sheets-convert-to-table-menu.png"
+  alt="Google Sheets Format menu open with Convert to table highlighted"
+  showChrome={false}
+  imgWidth={2772}
+  imgHeight={2072}
+/>
+
+Your sheet should now look like an interactive table with dropdowns on every column header.
+
+<Screenshot
+  src="/screenshots/week-2/sheets-table-converted.png"
+  alt="Google Sheets data converted to a table, with dropdown arrows on every column header"
+  showChrome={false}
+  imgWidth={2772}
+  imgHeight={2072}
+/>
+
+That's it. You're strapped in and ready to start the interview.
+
+## Part 4: First date questions
 
 Before anyone sorts, filters or pivots anything, spend 10 to 15 minutes as a class interrogating the file, column by column:
 
