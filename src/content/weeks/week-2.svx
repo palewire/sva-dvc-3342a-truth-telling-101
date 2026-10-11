@@ -192,41 +192,10 @@ That's it. You're strapped in and ready to start the interview.
 
 Before anyone sorts, filters or pivots anything, spend 10 to 15 minutes as a class interrogating the file, column by column:
 
-- How many rows are there? What is *one row*? One eviction? One household? One person?
-- What are the different ways this file says "where" (`Borough`, `Eviction Postcode`, `Latitude`/`Longitude`, `BIN`, `BBL`)? Why so many?
-- What's missing, and where does it cluster? Scroll and look for blank cells together.
+- How many rows are there? Does it match what we expect?
 - What's the earliest and latest `Executed Date`? Does that match what you'd expect?
-- Who collected this, and why? A Marshal filing required paperwork. It wasn't collected by a reporter, or a researcher.
 
 Don't resolve anything yet. Just catalog what you notice on a whiteboard or shared doc. You'll come back to this habit in your homework.
-
-## Part 4: Sort and filter like a reporter
-
-### Sort by date
-
-Select the data range, then go to "Data" → "Sort range" → "Advanced range sorting options." Sort by `Executed Date`, A to Z.
-
-<Screenshot
-  src="/screenshots/week-2/sheets-sort-dialog.png"
-  alt="Google Sheets Advanced range sorting options dialog set to sort by Executed Date"
-  showChrome={false}
-/>
-
-Scroll through the result. Does the volume look steady across the year, or clustered?
-
-### Sort by borough
-
-Re-sort, this time by `BOROUGH`, A to Z. Notice which borough has the most rows just by scrolling the size of each block. The Bronx will visibly dominate.
-
-### Turn on filters
-
-Select the header row plus the data, then go to "Data" → "Create a filter." New dropdown arrows should appear on every column header.
-
-<Screenshot
-  src="/screenshots/week-2/sheets-filters-enabled.png"
-  alt="Google Sheets header row showing filter dropdown arrows after enabling Create a filter"
-  showChrome={false}
-/>
 
 ### Filter to residential evictions
 
@@ -239,10 +208,6 @@ Click the filter dropdown on `Residential/Commercial`. Uncheck "Commercial," lea
 />
 
 Check the new row count in the bottom-right corner of the sheet.
-
-### Filter to a single zip code
-
-Click the filter dropdown on `Eviction Postcode`. Use the search box to type a single zip code, picking one with a visible count, like `10457`. This is the same move you'll make later for your own neighborhood. Once you've seen it work, clear this filter before moving on, but keep the Residential-only filter active.
 
 ## Part 5: Pivot tables and the citywide trend
 
@@ -346,9 +311,20 @@ Answer in writing:
 
 ## Homework Assignments
 
-### Task 1: Choose and interrogate a dataset
+### Task 1: Interview a different dataset
 
 Pick one dataset that interests you. Any topic, any source, any city, or none at all. It doesn't need to be about evictions, and it doesn't need to come from NYC Open Data. A short list of options is below if you want a starting point, but picking something else entirely is encouraged.
+
+
+Here are a few optional starting points, all from NYC Open Data, each with its own flaw worth hunting for:
+
+| Dataset | Size | Geo fields | The flaw |
+|---|---:|---|---|
+| [Restaurant Inspection Results](https://data.cityofnewyork.us/Health/DOHMH-New-York-City-Restaurant-Inspection-Results/43nn-pn8j) | 296,623 rows | Building/Street/Zip, Lat/Long, BIN, BBL | One row is one *violation*, not one restaurant. A place with 5 violations appears 5 times. Counting rows naively manufactures a fake restaurant-safety crisis. |
+| [Rodent Inspection](https://data.cityofnewyork.us/Health/Rodent-Inspection/p937-wjvj) | ~3.1 million rows (filter to one recent year) | Borough, Lat/Long, Community Board | DOHMH's own documentation says absence from this dataset doesn't mean absence of rats, only that nobody called 311 or an inspector hasn't been there yet. High counts can mean more rats, or more complaining neighbors. |
+| [Motor Vehicle Collisions – Crashes](https://data.cityofnewyork.us/Public-Safety/Motor-Vehicle-Collisions-Crashes/h9gi-nx95) | 86,516 in the last 12 months | Borough, Zip, Lat/Long | `Contributing Factor` and `Vehicle Type` are self-reported by officers on scene and are blank or "Unspecified" extremely often. The most story-relevant columns are the least reliable. |
+| [Street Pothole Work Orders – Closed](https://data.cityofnewyork.us/Transportation/Street-Pothole-Work-Orders-Closed-Dataset/x9wy-ing4) | 411,745 rows | Street-segment line geometry plus address fields, no lat/long points | Location is a street segment, not a point, so "localize to your block" is harder than it looks. `InitBy` and `Source` are undocumented codes with no definition on the dataset page, a direct "who collected this and why" trap. About 162,000 rows have no house number. |
+| [Affordable Housing Production by Building](https://data.cityofnewyork.us/Housing-Development/Affordable-Housing-Production-by-Building/hg8x-zxpr) | 9,551 rows | House Number/Street, Borough, Zip, BBL, BIN, Community Board, Census Tract, NTA, Lat/Long | About 1,949 rows have the project name, and often the address, redacted as "CONFIDENTIAL." About 1,958 rows have no coordinates. The same building can appear more than once across projects, and a "Preservation" project can mean zero construction, just extended rent restrictions on an existing building. |
 
 Ask it the same five questions from Part 3:
 
@@ -365,13 +341,3 @@ From those answers, identify one genuine strength and one genuine weakness of th
 ### Task 3: Present it next week
 
 Be ready to give a short, informal presentation in Week 3: what the dataset is, what the five questions turned up, and the strength and weakness you landed on.
-
-Here are a few optional starting points, all from NYC Open Data, each with its own flaw worth hunting for:
-
-| Dataset | Size | Geo fields | The flaw |
-|---|---:|---|---|
-| [Restaurant Inspection Results](https://data.cityofnewyork.us/Health/DOHMH-New-York-City-Restaurant-Inspection-Results/43nn-pn8j) | 296,623 rows | Building/Street/Zip, Lat/Long, BIN, BBL | One row is one *violation*, not one restaurant. A place with 5 violations appears 5 times. Counting rows naively manufactures a fake restaurant-safety crisis. |
-| [Rodent Inspection](https://data.cityofnewyork.us/Health/Rodent-Inspection/p937-wjvj) | ~3.1 million rows (filter to one recent year) | Borough, Lat/Long, Community Board | DOHMH's own documentation says absence from this dataset doesn't mean absence of rats, only that nobody called 311 or an inspector hasn't been there yet. High counts can mean more rats, or more complaining neighbors. |
-| [Motor Vehicle Collisions – Crashes](https://data.cityofnewyork.us/Public-Safety/Motor-Vehicle-Collisions-Crashes/h9gi-nx95) | 86,516 in the last 12 months | Borough, Zip, Lat/Long | `Contributing Factor` and `Vehicle Type` are self-reported by officers on scene and are blank or "Unspecified" extremely often. The most story-relevant columns are the least reliable. |
-| [Street Pothole Work Orders – Closed](https://data.cityofnewyork.us/Transportation/Street-Pothole-Work-Orders-Closed-Dataset/x9wy-ing4) | 411,745 rows | Street-segment line geometry plus address fields, no lat/long points | Location is a street segment, not a point, so "localize to your block" is harder than it looks. `InitBy` and `Source` are undocumented codes with no definition on the dataset page, a direct "who collected this and why" trap. About 162,000 rows have no house number. |
-| [Affordable Housing Production by Building](https://data.cityofnewyork.us/Housing-Development/Affordable-Housing-Production-by-Building/hg8x-zxpr) | 9,551 rows | House Number/Street, Borough, Zip, BBL, BIN, Community Board, Census Tract, NTA, Lat/Long | About 1,949 rows have the project name, and often the address, redacted as "CONFIDENTIAL." About 1,958 rows have no coordinates. The same building can appear more than once across projects, and a "Preservation" project can mean zero construction, just extended rent restrictions on an existing building. |
