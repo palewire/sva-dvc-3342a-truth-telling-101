@@ -200,6 +200,26 @@ That's it. You're strapped in and ready to start the interview.
 - What are the unique values in each column? What type of data do they store?
 - Where do we see empty cells? Do those have any pattern or significance?
 
+Sorting the data is done by selecting the filter dropdown and picking one of the top two options.
+
+<Screenshot
+  src="/screenshots/week-2/sheets-sort-dropdown.png"
+  alt="Google Sheets filter dropdown on the Executed Date column showing Sort A to Z and Sort Z to A options"
+  showChrome={false}
+  imgWidth={2772}
+  imgHeight={2072}
+/>
+
+Filtering is done by narrowing down the unique values selected in the box at the bottom of the filter dropdown.
+
+<Screenshot
+  src="/screenshots/week-2/sheets-filter-values.png"
+  alt="Google Sheets filter dropdown on Residential/Commercial with only Residential checked and Commercial unchecked"
+  showChrome={false}
+  imgWidth={2772}
+  imgHeight={2072}
+/>
+
 ## Part 5: Pivot tables FTW
 
 Select the full data range, then go to "Insert" → "Pivot table" → "New sheet."
