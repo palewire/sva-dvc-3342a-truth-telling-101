@@ -166,26 +166,6 @@ Moments later, your blank sheet should be replaced by the full dataset.
   imgHeight={2072}
 />
 
-Finally, go to the "Format" menu at the top and select "Convert to table." This will activate features that make sorting, filtering and analyzing the data easier.
-
-<Screenshot
-  src="/screenshots/week-2/sheets-convert-to-table-menu.png"
-  alt="Google Sheets Format menu open with Convert to table highlighted"
-  showChrome={false}
-  imgWidth={2772}
-  imgHeight={2072}
-/>
-
-Your sheet should now look like an interactive table with dropdowns on every column header.
-
-<Screenshot
-  src="/screenshots/week-2/sheets-table-converted.png"
-  alt="Google Sheets data converted to a table, with dropdown arrows on every column header"
-  showChrome={false}
-  imgWidth={2772}
-  imgHeight={2072}
-/>
-
 That's it. You're strapped in and ready to start the interview.
 
 ## Part 4: First date questions
@@ -193,9 +173,7 @@ That's it. You're strapped in and ready to start the interview.
 Before anyone sorts, filters or pivots anything, spend 10 to 15 minutes as a class interrogating the file, column by column:
 
 - How many rows are there? Does it match what we expect?
-- What's the earliest and latest `Executed Date`? Does that match what you'd expect?
-
-Don't resolve anything yet. Just catalog what you notice on a whiteboard or shared doc. You'll come back to this habit in your homework.
+- What's the earliest and latest `Executed Date`? Does that match what we expect?
 
 ### Filter to residential evictions
 
