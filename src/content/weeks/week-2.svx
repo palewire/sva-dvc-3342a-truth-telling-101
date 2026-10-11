@@ -5,6 +5,7 @@ week: 2
 ---
 
 <script>
+  import Aside from '$lib/components/Aside.svelte';
   import Screenshot from '$lib/components/Screenshot.svelte';
 </script>
 
@@ -46,45 +47,47 @@ Finally, you'll be asked to investigate evictions in your own neighborhood, as y
   chromeUrl="https://data.cityofnewyork.us/City-Government/Evictions/6z8x-wfk4"
 />
 
-Tonight's dataset is [NYC Open Data's Evictions dataset](https://data.cityofnewyork.us/City-Government/Evictions/6z8x-wfk4), compiled from NYC Marshal and Department of Investigation filings. It has 135,270 rows covering 2017 to the present, and it's updated daily. The columns that matter tonight are `Eviction Address`, `Eviction Apartment Number`, `Executed Date`, `Borough`, `Eviction Postcode`, `Residential/Commercial`, `Latitude`, `Longitude`, `Community Board`, `Council District`, `Census Tract`, `BIN`, `BBL` and `NTA`.
+The dataset that Brand analyzed isn't hard to find. It's published for anyone to access on [NYC Open Data](https://www.nyc.gov/opendata), a warehouse of public datasets maintained by the city. It offers more than 3,000 public resources, covering everything from [311 calls](https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2020-to-Present/erm2-nwe9/about_data) to [taxi cab trips](https://data.cityofnewyork.us/Transportation/2025-Yellow-Taxi-Trip-Data/irx2-vgm4/about_data) to the [squirrels that scamper through Central Park](https://data.cityofnewyork.us/Environment/2018-Central-Park-Squirrel-Census-Squirrel-Data/vfnx-vebw/about_data).
 
-We picked this dataset for a few reasons. It's building-level, identified by `BBL` and `BIN` rather than just a borough name. It's current. It's a manageable size even across its full history, well within what Sheets handles comfortably. And, importantly, it has a well-documented, journalistically real flaw baked into it, which we'll get to in a moment.
+Follow the link in Brand's story, and you'll land on the data portal's ["Evictions"](https://data.cityofnewyork.us/City-Government/Evictions/6z8x-wfk4/about_data) page. At the time of this writing, it offered a list of more than 135,000 evictions executed across the five boroughs since 2017.
 
-We're working with the whole dataset tonight, not a slice: all 135,270 rows, 2017 to the present, so you can see the full history in one file and filter down to whatever window a question needs, whether that's your own zip code, the last year, or a single month. Here's the citywide breakdown by borough, pulled live the week of Oct. 10, 2026:
+Before we do anything with the data, take a minute to read the dataset's documentation. This is a good moment to slow down and answer the basic questions reporters should ask of every dataset.
 
-| Borough | Evictions |
-|---|---:|
-| Bronx | 42,889 |
-| Brooklyn | 37,653 |
-| Queens | 27,571 |
-| Manhattan | 22,280 |
-| Staten Island | 4,877 |
-| **Total** | **135,270** |
+- Who produced this database?
+- What does each row represent?
+- What time range does it cover?
+- What could it claim to measure?
+- What could it be leaving out?
 
-### The scope flaw
+<Aside title="Stop and think">
+  <p>Consider the questions above before moving on. What is your answer to each?</p>
+</Aside>
 
-NYC's own documentation says this dataset counts only evictions a City Marshal actually *executed*. It does not include eviction cases that were filed but settled or withdrawn before a marshal arrived, informal "cash for keys" departures, or illegal lockouts. Housing advocates argue these outnumber executed cases. In other words, this dataset measures the *end* of a much larger, mostly invisible process.
+As you explore the dataset's documentation, you will notice that the city's site offers a number of useful tools for exploring the data in your web browser. While there's no shame in using them, the first thing most data journalists do is download the full dataset, so they can open it up in the tool of their choice.
 
-### The geocoding gap
-
-This one you can measure yourself: of all 135,270 evictions, **11,983 (about 8.9%)** have no latitude or longitude at all. Any map or neighborhood count you build from this data is already missing real evictions before you ask a single question, and that gap isn't necessarily spread evenly across boroughs. That's an open question tonight raises but doesn't resolve.
-
-## Part 3: Get the data onto your machine
-
-### Download the full CSV
-
-Open the [Evictions dataset page](https://data.cityofnewyork.us/City-Government/Evictions/6z8x-wfk4) on NYC Open Data. Click the "Export" button, then choose "CSV." You don't need to apply any filter first — grab the whole dataset. Save it somewhere you can find it again, like your Downloads folder.
+In the case of the city's site, you can do that by clicking the "Export" button in the upper right and downloading the "CSV" file. CSV stands for [comma-separated values](https://en.wikipedia.org/wiki/Comma-separated_values). It's a neutral format for storing rows and columns of data that can be opened in virtually any data manipulation tool.
 
 <Screenshot
-  src="/screenshots/week-2/nyc-open-data-export.png"
-  alt="NYC Open Data Evictions dataset page with the Export button open and CSV option visible"
+  src="/screenshots/week-2/nyc-open-data-export-dialog.png"
+  alt="NYC Open Data Export dataset dialog set to Download file, CSV format, with All data (135270 rows) selected"
   chromeTitle="NYC Open Data"
   chromeUrl="https://data.cityofnewyork.us/City-Government/Evictions/6z8x-wfk4"
+  imgWidth={2758}
+  imgHeight={2072}
 />
 
-This is the exact same public file a professional newsroom would pull. No special access, no API key, just a browser and a few clicks.
+The file should soon appear in your computer's Downloads folder, or wherever your browser saves files. If you were to open it in a text editor, you would see rows of data separated by commas, with the first row containing the column headers. That's what to expect from CSV.
 
-### Import it into Google Sheets
+<Screenshot
+  src="/screenshots/week-2/csv-text-editor.png"
+  alt="The evictions CSV file opened in a text editor, showing comma-separated rows with the header row at top"
+  showChrome={false}
+  bordered={false}
+  imgWidth={2842}
+  imgHeight={2242}
+/>
+
+## Part 3: Importing into Google Sheets
 
 Open a new Google Sheet and name it something like `NYC Evictions Analysis`. Rename "Sheet1" to `Evictions_raw`.
 

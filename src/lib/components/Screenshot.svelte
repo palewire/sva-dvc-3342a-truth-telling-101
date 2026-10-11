@@ -10,7 +10,8 @@
     width = '100%',
     maxWidth = '720px',
     imgWidth = 1440,
-    imgHeight = 900
+    imgHeight = 900,
+    bordered = true
   }: {
     src: string;
     alt: string;
@@ -21,6 +22,7 @@
     maxWidth?: string;
     imgWidth?: number;
     imgHeight?: number;
+    bordered?: boolean;
   } = $props();
 
   // Handle both absolute URLs and relative paths
@@ -102,7 +104,7 @@
       </div>
     </div>
   {:else}
-    <div class="screenshot-simple">
+    <div class="screenshot-simple" class:no-border={!bordered}>
       {#if chromeUrl}
         <a
           class="screenshot-link"
@@ -234,6 +236,12 @@
       0 4px 6px -1px rgba(0, 0, 0, 0.1),
       0 2px 4px -1px rgba(0, 0, 0, 0.06);
     border: 1px solid var(--rule);
+  }
+
+  .screenshot-simple.no-border {
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
   }
 
   .screenshot-simple img {

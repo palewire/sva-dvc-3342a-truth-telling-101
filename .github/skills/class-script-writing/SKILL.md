@@ -142,6 +142,25 @@ Since `.svx` files are processed by MDsveX, `<` and `>` in prose are interpreted
 
 This applies outside of fenced code blocks only — code blocks and inline code are safe.
 
+## Asides and Notes
+
+Use the `Aside` component to call out a tangent, caveat or warning without breaking the flow of the main prose:
+
+```svelte
+<script>
+  import Aside from '$lib/components/Aside.svelte';
+</script>
+
+<Aside title="A note on partial months">
+  <p>
+    The most recent month in any live dataset is almost always incomplete. Don't compare
+    it directly to full months without normalizing.
+  </p>
+</Aside>
+```
+
+`title` defaults to "Note" if omitted. The body can hold any markdown or components (paragraphs, lists, embeds).
+
 ## Screenshots
 
 Use the `Screenshot` component for hands-on weeks, same API as the CUNY course:
