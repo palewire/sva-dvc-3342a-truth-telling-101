@@ -142,7 +142,7 @@ test('links the instructor photo to the bio page', async ({ page }) => {
   await expect(emailLink).toHaveCSS('outline-color', 'rgb(230, 31, 0)');
 });
 
-test('links the first classroom script when it is published', async ({ page }) => {
+test('links the published classroom scripts', async ({ page }) => {
   await page.goto('./');
 
   await expect(page.locator('.meeting-dates')).toHaveCount(0);
@@ -151,13 +151,21 @@ test('links the first classroom script when it is published', async ({ page }) =
   await expect(page.locator('#schedule .section-intro')).toHaveText(
     'All of the materials we cover will be made available after class.'
   );
-  await expect(page.locator('.script-card')).toHaveCount(1);
-  await expect(page.locator('.script-card')).toHaveAttribute(
-    'href',
-    `${basePath}/weeks/week-1/`
-  );
-  await expect(page.locator('.script-card h3')).toHaveText('Social science in a hurry');
-  await expect(page.locator('.script-card p')).toHaveText('October 5, 2026');
+
+  const cards = page.locator('.script-card');
+  await expect(cards).toHaveCount(6);
+  await expect(page.locator('.script-card-disabled')).toHaveCount(4);
+
+  const week1 = cards.nth(0);
+  await expect(week1).toHaveAttribute('href', `${basePath}/weeks/week-1/`);
+  await expect(week1.locator('h3')).toHaveText('Social science in a hurry');
+  await expect(week1.locator('p')).toHaveText('October 5, 2026');
+
+  const week2 = cards.nth(1);
+  await expect(week2).toHaveAttribute('href', `${basePath}/weeks/week-2/`);
+  await expect(week2.locator('h3')).toHaveText('Interviewing data');
+  await expect(week2.locator('p')).toHaveText('Monday, Oct. 12, 2026');
+
   const sections = page.locator('main > section');
   await expect(sections.nth((await sections.count()) - 1)).toHaveAttribute(
     'id',
@@ -234,9 +242,9 @@ test('fits a phone screen and supports the keyboard skip link', async ({ page })
     () => document.documentElement.scrollWidth - document.documentElement.clientWidth
   );
   expect(overflow).toBeLessThanOrEqual(1);
-  const scriptCard = page.locator('.script-card');
+  const scriptCard = page.locator('.script-card').first();
   const skillCard = page.locator('.course-skill').first();
-  await expect(scriptCard).toHaveCount(1);
+  await expect(page.locator('.script-card')).toHaveCount(6);
   await expect(page.locator('.speaker-card')).toHaveCount(3);
   await expect(scriptCard).toHaveCSS('padding', '12px');
   await expect(skillCard).toHaveCSS('padding', '12px');
@@ -244,7 +252,7 @@ test('fits a phone screen and supports the keyboard skip link', async ({ page })
   await expect(page.locator('.section-header h2').first()).toHaveCSS('font-size', '26px');
   await expect(page.locator('.section-intro').first()).toHaveCSS('font-size', '16px');
   await expect(page.locator('.course-skill h3').first()).toHaveCSS('font-size', '16px');
-  await expect(page.locator('.script-card h3')).toHaveCSS('font-size', '20px');
+  await expect(page.locator('.script-card h3').first()).toHaveCSS('font-size', '20px');
   for (const portrait of await page.locator('.speaker-portrait').all()) {
     await expect(portrait).toHaveCSS('background-color', 'rgb(30, 150, 184)');
     await expect(portrait).toHaveCSS('border-radius', '0px');
@@ -284,7 +292,7 @@ test('prints the syllabus in black on white without navigation or portrait block
   for (const portrait of await page.locator('.speaker-portrait').all()) {
     await expect(portrait).toBeHidden();
   }
-  await expect(page.locator('.script-card')).toHaveCount(1);
+  await expect(page.locator('.script-card')).toHaveCount(6);
   expect(
     await page
       .locator('.hero')
