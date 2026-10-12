@@ -1,0 +1,325 @@
+---
+title: 'Interviewing data'
+summary: 'How journalists use spreadsheets to ask and answer questions'
+week: 2
+---
+
+<script>
+  import Aside from '$lib/components/Aside.svelte';
+  import Screenshot from '$lib/components/Screenshot.svelte';
+</script>
+
+In [week one](../week-1), we discussed data journalism at a high level, covering the broad principles that guide the work. Now it's time to get hands-on and see how those ideas can be applied to a real story, using a real dataset.
+
+## Part 1: Tonight's role model
+
+We will use a July 2026 piece published by Gothamist as our guide. Authored by the public media outlet's housing reporter, [David Brand](https://gothamist.com/staff/david-brand), it's headlined: ["More than 8K NYC renters evicted so far this year, as affordability crisis grows."](https://gothamist.com/news/more-than-8k-nyc-renters-evicted-so-far-this-year-as-affordability-crisis-grows)
+
+<Screenshot
+  src="/screenshots/week-2/gothamist-evictions-article.png"
+  alt="Gothamist headline: More than 8K NYC renters evicted so far this year, as affordability crisis grows"
+  chromeTitle="Gothamist"
+  chromeUrl="https://gothamist.com/news/more-than-8k-nyc-renters-evicted-so-far-this-year-as-affordability-crisis-grows"
+  imgWidth={2490}
+  imgHeight={2072}
+/>
+
+His story landed soon after the inauguration of Mayor Zohran Mamdani, a long-shot candidate who electrified voters with an energetic campaign focused on lowering the cost of living for renters and low-income New Yorkers.
+
+But it wasn't a new topic for Brand, who has been tracking eviction data closely since the pandemic, when a statewide moratorium temporarily brought removals to a halt.
+
+"Every six months or so I revisit the data to see trends," Brand told me in an interview about his work. "We see that the eviction totals are pretty similar to prior to COVID. Knowing that it was approaching or surpassing that number, I knew there would be a story."
+
+And so there was.
+
+The cornerstone of the piece was his finding that "New York City marshals completed an average of 1,345 evictions per month from January to June, approaching the rate of removals from the years prior to the COVID-19 pandemic."
+
+And he did more than dump the data. Brand brought in expert sources to explain how the eviction process works, and what early steps the new administration is taking to address the issue.
+
+"I try to talk to landlords, representatives for landlords, tenants' rights people and housing policy people," Brand said. "I'm always trying to bring context."
+
+While it may be too soon to judge the new mayor's impact, for Mamdani to claim his policies are a success, numbers like that will need to go down. Brand is ready to apply his measuring stick again when it's time to start evaluating the mayor's performance.
+
+"Since a lot of these cases can take nearly a year to wind to a final eviction order, I think it should be time to start looking at Mamdani at the one year mark," Brand said.
+
+In today's class, we will follow in his footsteps, recreating the Gothamist analysis from scratch.
+
+Then we'll update it to include the data that's been released since the story came out, and see if there are any signs of a shift.
+
+Finally, you'll be asked to investigate evictions in your own neighborhood, as you take your first steps towards developing data journalism of your own.
+
+We'll do all that using Google Sheets, the same free spreadsheet tool that Brand used for his analysis. No fancy programming language or LLM tokens are required to do quality work.
+
+"There's a lot you can do with Google Sheets," Brand said. "You can start small and it gives you the foundation. Start and you'll learn gradually."
+
+## Part 2: Meet the dataset
+
+<Screenshot
+  src="/screenshots/week-2/nyc-open-data-evictions-dataset.png"
+  alt="NYC Open Data Evictions dataset page showing the About tab, update frequency and source agency"
+  chromeTitle="NYC Open Data"
+  chromeUrl="https://data.cityofnewyork.us/City-Government/Evictions/6z8x-wfk4"
+/>
+
+The dataset that Brand analyzed isn't hard to find. It's published for anyone to access on [NYC Open Data](https://www.nyc.gov/opendata), a warehouse of public datasets maintained by the city. It offers more than 3,000 public resources, covering everything from [311 calls](https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2020-to-Present/erm2-nwe9/about_data) to [taxi cab trips](https://data.cityofnewyork.us/Transportation/2025-Yellow-Taxi-Trip-Data/irx2-vgm4/about_data) to the [squirrels that scamper through Central Park](https://data.cityofnewyork.us/Environment/2018-Central-Park-Squirrel-Census-Squirrel-Data/vfnx-vebw/about_data).
+
+Follow the link in Brand's story, and you'll land on the data portal's ["Evictions"](https://data.cityofnewyork.us/City-Government/Evictions/6z8x-wfk4/about_data) page. At the time of this writing, it offered a list of more than 135,000 evictions executed across the five boroughs since 2017.
+
+Before we do anything with the data, take a minute to read the dataset's documentation. This is a good moment to slow down and answer the basic questions reporters should ask of every dataset.
+
+- Who produced this database?
+- What does each row represent?
+- What time range does it cover?
+- What could it claim to measure?
+- What could it be leaving out?
+
+<Aside title="Stop and think">
+  <p>Consider the questions above before moving on. What is your answer to each?</p>
+</Aside>
+
+As you explore the dataset's documentation, you will notice that the city's site offers a number of useful tools for exploring the data in your web browser. While there's no shame in using them, the first thing most data journalists do is download the full dataset, so they can open it up in the tool of their choice.
+
+In the case of the city's site, you can do that by clicking the "Export" button in the upper right and downloading the "CSV" file. CSV stands for [comma-separated values](https://en.wikipedia.org/wiki/Comma-separated_values). It's a neutral format for storing rows and columns of data that can be opened in virtually any data manipulation tool.
+
+<Screenshot
+  src="/screenshots/week-2/nyc-open-data-export-dialog.png"
+  alt="NYC Open Data Export dataset dialog set to Download file, CSV format, with All data (135270 rows) selected"
+  chromeTitle="NYC Open Data"
+  chromeUrl="https://data.cityofnewyork.us/City-Government/Evictions/6z8x-wfk4"
+  imgWidth={2758}
+  imgHeight={2072}
+/>
+
+The file should soon appear in your computer's Downloads folder, or wherever your browser saves files. If you were to open it in a text editor, you would see rows of data separated by commas, with the first row containing the column headers. That's what to expect from CSV.
+
+<Screenshot
+  src="/screenshots/week-2/csv-text-editor.png"
+  alt="The evictions CSV file opened in a text editor, showing comma-separated rows with the header row at top"
+  showChrome={false}
+  bordered={false}
+  imgWidth={2842}
+  imgHeight={2242}
+/>
+
+## Part 3: Importing into Google Sheets
+
+For tonight's exercise, we'll be working in [Google Sheets](https://en.wikipedia.org/wiki/Google_Sheets). It's a free spreadsheet tool with all the standard features, plus the ability to share and collaborate over the web.
+
+You should get started by visiting [drive.google.com](https://drive.google.com) and creating a new spreadsheet workbook. You do that by clicking "+ New" in the upper left, selecting "Sheets" and then "Blank spreadsheet."
+
+<Screenshot
+  src="/screenshots/week-2/google-drive-new-sheet-menu.png"
+  alt="Google Drive New menu open, with Google Sheets submenu showing Blank spreadsheet option"
+  chromeTitle="Google Drive"
+  chromeUrl="https://drive.google.com/drive/u/4/my-drive"
+  imgWidth={2772}
+  imgHeight={2072}
+/>
+
+<Aside title="BYO Spreadsheet">
+  <p>There's no law that says you have to use Google Sheets to complete this exercise. You are welcome to use any spreadsheet tool you prefer, such as Microsoft Excel, LibreOffice Calc or Apple Numbers.</p>
+</Aside>
+
+Once you have your new spreadsheet, the next step is to import the CSV file you downloaded earlier.
+
+First, go to the "File" menu in the upper left and select "Import."
+
+<Screenshot
+  src="/screenshots/week-2/sheets-import-menu.png"
+  alt="Google Sheets File menu open with the Import option highlighted"
+  showChrome={false}
+  imgWidth={2772}
+  imgHeight={2072}
+/>
+
+Then flip to the "Upload" tab, where you can drag and drop the file, or click "Browse" to select it from your computer's directory system.
+
+<Screenshot
+  src="/screenshots/week-2/sheets-upload-tab.png"
+  alt="Google Sheets import dialog on the Upload tab, with a drag-and-drop area and Browse button"
+  showChrome={false}
+  imgWidth={2772}
+  imgHeight={2072}
+/>
+
+Since it's nearly 30 megabytes of data, it may take the file a few moments to upload.
+
+Then you'll see this "Import File" dialog that asks you how Sheets should handle the import.
+
+<Screenshot
+  src="/screenshots/week-2/sheets-import-file-dialog.png"
+  alt="Google Sheets Import file dialog set to Replace spreadsheet with separator type Detect automatically"
+  showChrome={false}
+  imgWidth={2772}
+  imgHeight={2072}
+/>
+
+Since we're starting with a blank sheet and there's no pre-existing data to worry about, it's safe to stick with the "Replace spreadsheet" option. Because our data is in the standard comma-separated format, you can leave the default separator setting as well. Click "Import data."
+
+Moments later, your blank sheet should be replaced by the full dataset.
+
+<Screenshot
+  src="/screenshots/week-2/sheets-data-imported.png"
+  alt="Google Sheets populated with the full evictions dataset after import"
+  showChrome={false}
+  imgWidth={2772}
+  imgHeight={2072}
+/>
+
+Now, before we start working with the data, we want to turn on a control interface that will empower the row at the top of the sheet to manipulate the data. You should do this by making sure the first row of the sheet is selected, clicking on the "Data" menu, and selecting "Create a filter."
+
+<Screenshot
+  src="/screenshots/week-2/sheets-create-filter-menu.png"
+  alt="Google Sheets Data menu open with Create a filter highlighted"
+  showChrome={false}
+  imgWidth={2772}
+  imgHeight={2072}
+/>
+
+Once you do that, you should see a new pulldown menu on every column header.
+
+<Screenshot
+  src="/screenshots/week-2/sheets-filter-dropdowns.png"
+  alt="Google Sheets with filter dropdown arrows on every column header, one open showing Residential and Commercial options"
+  showChrome={false}
+  imgWidth={2772}
+  imgHeight={2072}
+/>
+
+That's it. You're strapped in and ready to start the interview.
+
+## Part 4: First date questions
+
+We need to get to know our dataset. Before we get too pointed in our questioning, we need to spend some time getting to know each other. Just like a human subject, it's helpful to spend time establishing common ground, to ask basic questions, to gain a deeper understanding.
+
+You can do that by keeping it simple. Here are five questions to start with, which we can answer simply by scrolling through the data, or using the filter and sorting controls.
+
+- How many rows are in the spreadsheet? Does it match what we expect?
+- What are the earliest and latest dates in the data? Does that match what we expect?
+- What is each column trying to record?
+- What are the unique values in each column? What type of data do they store?
+- Where do we see empty cells? Do those have any pattern or significance?
+
+Sorting the data is done by selecting the filter dropdown and picking one of the top two options.
+
+<Screenshot
+  src="/screenshots/week-2/sheets-sort-dropdown.png"
+  alt="Google Sheets filter dropdown on the Executed Date column showing Sort A to Z and Sort Z to A options"
+  showChrome={false}
+  imgWidth={2772}
+  imgHeight={2072}
+/>
+
+Filtering is done by narrowing down the unique values selected in the box at the bottom of the filter dropdown.
+
+<Screenshot
+  src="/screenshots/week-2/sheets-filter-values.png"
+  alt="Google Sheets filter dropdown on Residential/Commercial with only Residential checked and Commercial unchecked"
+  showChrome={false}
+  imgWidth={2772}
+  imgHeight={2072}
+/>
+
+## Part 5: Pivot tables FTW
+
+Select the full data range by clicking in the upper-left corner of the spreadsheet, then go to the "Insert" menu, select "Pivot table" and click the "Create" button.
+
+This will create a new interface where you can group your data by different columns and summarize it in various ways. That's what people mean when they talk about pivot tables.
+
+<Screenshot
+  src="/screenshots/week-2/sheets-pivot-borough.png"
+  alt="Google Sheets pivot table editor with Borough as rows and a COUNTA value, showing counts by borough"
+  showChrome={false}
+  imgWidth={2772}
+  imgHeight={2072}
+/>
+
+Try dragging the categorical columns like `BOROUGH` into the "Rows" section and numerical or date columns like `Court Index Number` into the "Values" section. The `COUNTA` function will count the number of entries for each category.
+
+Now use this technique to practice asking and answering questions. Here are a few to try:
+
+- How many evictions occurred in each borough?
+- Are there more evictions at commercial or residential properties?
+- Which neighborhood had the most residential evictions?
+- Which neighborhood had the most commercial evictions?
+
+### Turn dates into months
+
+Now we'll recreate Brand's analysis. We can start by grouping our pivot table by the year and month of the `Executed Date` column.
+
+<Screenshot
+  src="/screenshots/week-2/sheets-pivot-month.png"
+  alt="Google Sheets pivot table grouped by Executed Date year and month, showing yearly and monthly eviction totals"
+  showChrome={false}
+  imgWidth={2772}
+  imgHeight={2072}
+/>
+
+That's a good start. But it won't match Brand's numbers. Why? Because we still need to filter down to residential evictions. Pivot tables can also do that by adding a filter for the `Residential/Commercial` column and selecting only `Residential`.
+
+<Screenshot
+  src="/screenshots/week-2/sheets-residential-filter.png"
+  alt="Google Sheets pivot table editor with a Residential/Commercial filter in the Filters section"
+  showChrome={false}
+  imgWidth={2772}
+  imgHeight={2072}
+/>
+
+Now compare your results to the chart in [Brand's story](https://gothamist.com/news/more-than-8k-nyc-renters-evicted-so-far-this-year-as-affordability-crisis-grows).
+
+See if you can ask and answer these questions:
+
+- How close are your numbers compared to his?
+- What do you see in the months since his story came out? Is the trend shifting?
+
+## Part 6: The catch
+
+When I interviewed him on the phone, Brand told me something I didn't know — something you could also learn by reading the city data portal's documentation.
+
+There are duplicates in the data. The same evictions appear more than once.
+
+And, like me, Brand didn't learn this from the data. He learned it by talking to human sources. Another reminder that it's crucial to reach out to experts before you assume you understand any dataset.
+
+Now do some internet research and see if you can figure out how to identify duplicates in our Google Sheet and eliminate them from the analysis. Brand told me he picks up tricks like that by asking ChatGPT what buttons he should click in Sheets.
+
+## Part 7: Do it yourself
+
+Filter the evictions to the ZIP code where you live and answer the following questions.
+
+- How do residential evictions this year compare to last year?
+- How do residential evictions this year compare to before COVID?
+- Has there been an eviction in the building where you live?
+
+## Homework
+
+### Task 1: Interview a different dataset
+
+Pick one dataset from the New York City data portal that interests you. Any topic. A short list of options is below if you want a starting point, but picking something else entirely is encouraged.
+
+| Dataset | Size | Geo fields | The flaw |
+|---|---:|---|---|
+| [Restaurant Inspection Results](https://data.cityofnewyork.us/Health/DOHMH-New-York-City-Restaurant-Inspection-Results/43nn-pn8j) | 296,623 rows | Building/Street/Zip, Lat/Long, BIN, BBL | One row is one *violation*, not one restaurant. A place with 5 violations appears 5 times. Counting rows naively manufactures a fake restaurant-safety crisis. |
+| [Rodent Inspection](https://data.cityofnewyork.us/Health/Rodent-Inspection/p937-wjvj) | ~3.1 million rows (filter to one recent year) | Borough, Lat/Long, Community Board | DOHMH's own documentation says absence from this dataset doesn't mean absence of rats, only that nobody called 311 or an inspector hasn't been there yet. High counts can mean more rats, or more complaining neighbors. |
+| [Motor Vehicle Collisions – Crashes](https://data.cityofnewyork.us/Public-Safety/Motor-Vehicle-Collisions-Crashes/h9gi-nx95) | 86,516 in the last 12 months | Borough, Zip, Lat/Long | `Contributing Factor` and `Vehicle Type` are self-reported by officers on scene and are blank or "Unspecified" extremely often. The most story-relevant columns are the least reliable. |
+| [Street Pothole Work Orders – Closed](https://data.cityofnewyork.us/Transportation/Street-Pothole-Work-Orders-Closed-Dataset/x9wy-ing4) | 411,745 rows | Street-segment line geometry plus address fields, no lat/long points | Location is a street segment, not a point, so "localize to your block" is harder than it looks. `InitBy` and `Source` are undocumented codes with no definition on the dataset page, a direct "who collected this and why" trap. About 162,000 rows have no house number. |
+| [Affordable Housing Production by Building](https://data.cityofnewyork.us/Housing-Development/Affordable-Housing-Production-by-Building/hg8x-zxpr) | 9,551 rows | House Number/Street, Borough, Zip, BBL, BIN, Community Board, Census Tract, NTA, Lat/Long | About 1,949 rows have the project name, and often the address, redacted as "CONFIDENTIAL." About 1,958 rows have no coordinates. The same building can appear more than once across projects, and a "Preservation" project can mean zero construction, just extended rent restrictions on an existing building. |
+
+Using Google Sheets, ask it the five questions from Part 2:
+
+- Who produced this database?
+- What does each row represent?
+- What time range does it cover?
+- What could it claim to measure?
+- What could it be leaving out?
+
+### Task 2: Diagnose its strengths and weaknesses
+
+From those answers, identify one genuine strength and one genuine weakness of the dataset. Not a complaint about a tool, but something real about what this data can and can't support as evidence.
+
+### Task 3: Ask and answer a question
+
+Develop a measurable question about the dataset, and then attempt to answer it using the data you have. You can ask about your neighborhood, trends in the city as a whole, or comparisons between different areas.
+
+### Task 4: Prepare to present
+
+Be ready to give a short, informal presentation about what you learned to your classmates next week. You'll be expected to have the five questions answered, discuss the strength and weakness you identified and explain how you answered your measurable question in Google Sheets.

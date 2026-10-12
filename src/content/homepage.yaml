@@ -63,23 +63,24 @@ schedule:
       href: /weeks/week-1/
     - number: 2
       date: '2026-10-12'
-      displayDate: 'Monday, Oct. 12'
-      topic: 'To be announced'
+      displayDate: 'Monday, Oct. 12, 2026'
+      topic: 'Interviewing data'
+      href: /weeks/week-2/
     - number: 3
       date: '2026-10-19'
-      displayDate: 'Monday, Oct. 19'
+      displayDate: 'Monday, Oct. 19, 2026'
       topic: 'To be announced'
     - number: 4
       date: '2026-10-26'
-      displayDate: 'Monday, Oct. 26'
+      displayDate: 'Monday, Oct. 26, 2026'
       topic: 'To be announced'
     - number: 5
       date: '2026-11-02'
-      displayDate: 'Monday, Nov. 2'
+      displayDate: 'Monday, Nov. 2, 2026'
       topic: 'To be announced'
     - number: 6
       date: '2026-11-09'
-      displayDate: 'Monday, Nov. 9'
+      displayDate: 'Monday, Nov. 9, 2026'
       topic: 'To be announced'
 
 guestSpeakers:
