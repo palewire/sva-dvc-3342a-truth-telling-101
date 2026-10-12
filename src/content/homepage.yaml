@@ -1,6 +1,6 @@
 # Edit the syllabus here. Add a week href only after its matching .svx page is ready.
 meta:
-  title: 'Truth-Telling 101: Artists Meet Data Journalism | SVA Continuing Education'
+  title: "Truth-Telling 101: how New York's leading newsrooms turn raw data into compelling journalism | SVA Continuing Education"
   description: 'The Fall 2026 syllabus for Ben Welsh’s six-week, in-person data journalism course at the School of Visual Arts.'
   image: 'social/sva-continuing-education.avif'
   imageAlt: 'A hand draws colorful three-dimensional letters spelling Art on a chalkboard.'
@@ -8,7 +8,7 @@ meta:
   imageHeight: '999'
 
 course:
-  title: 'Truth-Telling 101: Artists Meet Data Journalism'
+  title: "Truth-Telling 101: How New York's leading newsrooms turn raw data into compelling journalism"
   code: 'DVC-3342-A'
   school: 'School of Visual Arts'
   schoolUrl: 'https://sva.edu'

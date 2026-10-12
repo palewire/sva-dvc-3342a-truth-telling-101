@@ -11,7 +11,7 @@ test('shows the SVA course facts without artwork in the hero', async ({ page }) 
   await page.goto('./');
 
   await expect(page).toHaveTitle(
-    'Truth-Telling 101: Artists Meet Data Journalism | SVA Continuing Education'
+    "Truth-Telling 101: how New York's leading newsrooms turn raw data into compelling journalism | SVA Continuing Education"
   );
   await expect(page.locator('meta[name="description"]')).toHaveAttribute(
     'content',
@@ -177,7 +177,7 @@ test('renders the published week one page', async ({ page }) => {
   await page.goto('./weeks/week-1/');
 
   await expect(page).toHaveTitle(
-    'Social science in a hurry | Truth-Telling 101: Artists Meet Data Journalism'
+    "Social science in a hurry | Truth-Telling 101: How New York's leading newsrooms turn raw data into compelling journalism"
   );
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
     'Social science in a hurry'
