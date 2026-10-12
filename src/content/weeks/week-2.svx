@@ -190,12 +190,12 @@ That's it. You're strapped in and ready to start the interview.
 
 ## Part 4: First date questions
 
- We need to get to know our dataset. Before we get too pointed in our questioning, we need to spend some time getting to know each other. Just like a human subject, it's helpful to spend time establishing common ground, to ask basic questions, to gain a deeper understanding.
+We need to get to know our dataset. Before we get too pointed in our questioning, we need to spend some time getting to know each other. Just like a human subject, it's helpful to spend time establishing common ground, to ask basic questions, to gain a deeper understanding.
 
- You can do that by keeping it simple. Here are five questions to start with, which we can answer simply by scrolling through the data, or using the filter and sorting controls.
+You can do that by keeping it simple. Here are five questions to start with, which we can answer simply by scrolling through the data, or using the filter and sorting controls.
 
 - How many rows are in the spreadsheet? Does it match what we expect?
-- What is the earliest and latest dates in the data? Does that match what we expect?
+- What are the earliest and latest dates in the data? Does that match what we expect?
 - What is each column trying to record?
 - What are the unique values in each column? What type of data do they store?
 - Where do we see empty cells? Do those have any pattern or significance?
@@ -222,9 +222,9 @@ Filtering is done by narrowing down the unique values selected in the box at the
 
 ## Part 5: Pivot tables FTW
 
-Select the full data range, then go to "Insert" → "Pivot table" → "New sheet."
+Select the full data range by clicking in the upper-left corner of the spreadsheet, then go to the "Insert" menu, select "Pivot table" and click the "Create" button.
 
-In the pivot table editor, add `BOROUGH` under "Rows," and add `Executed Date` under "Values," summarized by `COUNTA`.
+This will create a new interface where you can group your data by different columns and summarize it in various ways. That's what people mean when they talk about pivot tables.
 
 <Screenshot
   src="/screenshots/week-2/sheets-pivot-borough.png"
@@ -234,9 +234,18 @@ In the pivot table editor, add `BOROUGH` under "Rows," and add `Executed Date` u
   imgHeight={2072}
 />
 
+Try dragging the categorical columns like `BOROUGH` into the "Rows" section and numerical or date columns like `Court Index Number` into the "Values" section. The `COUNTA` function will count the number of entries for each category.
+
+Now use this technique to practice asking and answering questions. Here are a few to try:
+
+- How many evictions occurred in each borough?
+- Are there more evictions at commercial or residential properties?
+- Which neighborhood had the most residential evictions?
+- Which neighborhood had the most commercial evictions?
+
 ### Turn dates into months
 
-TK
+Now we'll recreate Brand's analysis. We can start by grouping our pivot table by the year and month of the `Executed Date` column.
 
 <Screenshot
   src="/screenshots/week-2/sheets-pivot-month.png"
@@ -246,7 +255,7 @@ TK
   imgHeight={2072}
 />
 
-TK
+That's a good start. But it won't match Brand's numbers. Why? Because we still need to filter down to residential evictions. Pivot tables can also do that by adding a filter for the `Residential/Commercial` column and selecting only `Residential`.
 
 <Screenshot
   src="/screenshots/week-2/sheets-residential-filter.png"
@@ -256,27 +265,36 @@ TK
   imgHeight={2072}
 />
 
-Compare to the Gothamist chart.
+Now compare your results to the chart in [Brand's story](https://gothamist.com/news/more-than-8k-nyc-renters-evicted-so-far-this-year-as-affordability-crisis-grows).
 
-## Part 6: Do it yourself, for your neighborhood
+See if you can ask and answer these questions:
 
-Filter to the ZIP Code where you live and answer the following questions.
+- How close are your numbers compared to his?
+- What do you see in the months since his story came out? Is the trend shifting?
+
+## Part 6: The catch
+
+When I interviewed him on the phone, Brand told me something I didn't know — something you could also learn by reading the city data portal's documentation.
+
+There are duplicates in the data. The same evictions appear more than once.
+
+And, like me, Brand didn't learn this from the data. He learned it by talking to human sources. Another reminder that it's crucial to reach out to experts before you assume you understand any dataset.
+
+Now do some internet research and see if you can figure out how to identify duplicates in our Google Sheet and eliminate them from the analysis. Brand told me he picks up tricks like that by asking ChatGPT what buttons he should click in Sheets.
+
+## Part 7: Do it yourself
+
+Filter the evictions to the ZIP code where you live and answer the following questions.
 
 - How do residential evictions this year compare to last year?
 - How do residential evictions this year compare to before COVID?
 - Has there been an eviction in the building where you live?
 
-## Part 7: The catch
-
-David Brand told me something interesting. There are duplicates in the data. He didn't find it through data analysis or careful interview of his data. He found it by talking to human sources.
-
-## Homework Assignments
+## Homework
 
 ### Task 1: Interview a different dataset
 
-Pick one dataset that interests you. Any topic, any source, any city, or none at all. It doesn't need to be about evictions, and it doesn't need to come from NYC Open Data. A short list of options is below if you want a starting point, but picking something else entirely is encouraged.
-
-Here are a few optional starting points, all from NYC Open Data, each with its own flaw worth hunting for:
+Pick one dataset from the New York City data portal that interests you. Any topic. A short list of options is below if you want a starting point, but picking something else entirely is encouraged.
 
 | Dataset | Size | Geo fields | The flaw |
 |---|---:|---|---|
@@ -286,18 +304,22 @@ Here are a few optional starting points, all from NYC Open Data, each with its o
 | [Street Pothole Work Orders – Closed](https://data.cityofnewyork.us/Transportation/Street-Pothole-Work-Orders-Closed-Dataset/x9wy-ing4) | 411,745 rows | Street-segment line geometry plus address fields, no lat/long points | Location is a street segment, not a point, so "localize to your block" is harder than it looks. `InitBy` and `Source` are undocumented codes with no definition on the dataset page, a direct "who collected this and why" trap. About 162,000 rows have no house number. |
 | [Affordable Housing Production by Building](https://data.cityofnewyork.us/Housing-Development/Affordable-Housing-Production-by-Building/hg8x-zxpr) | 9,551 rows | House Number/Street, Borough, Zip, BBL, BIN, Community Board, Census Tract, NTA, Lat/Long | About 1,949 rows have the project name, and often the address, redacted as "CONFIDENTIAL." About 1,958 rows have no coordinates. The same building can appear more than once across projects, and a "Preservation" project can mean zero construction, just extended rent restrictions on an existing building. |
 
-Ask it the same five questions from Part 3:
+Using Google Sheets, ask it the five questions from Part 2:
 
-- How many rows? What is *one row*?
-- What are the different ways (if any) this data says "where," "who" and "when"?
-- What's missing, and where does it cluster?
-- What's the earliest and latest date in the data? Does that match what you'd expect?
-- Who collected this, and why?
+- Who produced this database?
+- What does each row represent?
+- What time range does it cover?
+- What could it claim to measure?
+- What could it be leaving out?
 
 ### Task 2: Diagnose its strengths and weaknesses
 
 From those answers, identify one genuine strength and one genuine weakness of the dataset. Not a complaint about a tool, but something real about what this data can and can't support as evidence.
 
-### Task 3: Present it next week
+### Task 3: Ask and answer a question
 
-Be ready to give a short, informal presentation in Week 3: what the dataset is, what the five questions turned up, and the strength and weakness you landed on.
+Develop a measurable question about the dataset, and then attempt to answer it using the data you have. You can ask about your neighborhood, trends in the city as a whole, or comparisons between different areas.
+
+### Task 4: Prepare to present
+
+Be ready to give a short, informal presentation about what you learned to your classmates next week. You'll be expected to have the five questions answered, discuss the strength and weakness you identified and explain how you answered your measurable question in Google Sheets.
