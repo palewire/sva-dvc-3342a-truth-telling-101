@@ -64,7 +64,8 @@ schedule:
     - number: 2
       date: '2026-10-12'
       displayDate: 'Monday, Oct. 12, 2026'
-      topic: 'To be announced'
+      topic: 'Interviewing data'
+      href: /weeks/week-2/
     - number: 3
       date: '2026-10-19'
       displayDate: 'Monday, Oct. 19, 2026'
