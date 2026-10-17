@@ -158,11 +158,84 @@ test('links the first classroom script when it is published', async ({ page }) =
   );
   await expect(page.locator('.script-card h3')).toHaveText('Social science in a hurry');
   await expect(page.locator('.script-card p')).toHaveText('October 5, 2026');
+  await expect(page.locator('.classroom-tool')).toContainText('Critique wheel');
+  await expect(page.locator('.classroom-tool-link')).toHaveAttribute(
+    'href',
+    `${basePath}/critique-wheel/`
+  );
   const sections = page.locator('main > section');
   await expect(sections.nth((await sections.count()) - 1)).toHaveAttribute(
     'id',
     'schedule'
   );
+});
+
+test('lets the lecture deck widen on desktop and fit the mobile text column', async ({
+  page
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('./weeks/week-1/');
+
+  const deck = page.locator('.lesson-deck');
+  const desktopWidths = await deck.evaluate((iframe) => ({
+    deck: iframe.getBoundingClientRect().width,
+    text: iframe.closest('.week-content')?.getBoundingClientRect().width ?? 0
+  }));
+  expect(desktopWidths.deck).toBeGreaterThan(desktopWidths.text);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  const mobileWidths = await deck.evaluate((iframe) => ({
+    deck: iframe.getBoundingClientRect().width,
+    text: iframe.closest('.week-content')?.getBoundingClientRect().width ?? 0,
+    page: document.documentElement.scrollWidth
+  }));
+  expect(mobileWidths.deck).toBeCloseTo(mobileWidths.text, 0);
+  expect(mobileWidths.page).toBe(390);
+});
+
+test('runs the critique wheel without saving or hard-coding a roster', async ({
+  page
+}) => {
+  await page.goto('./');
+  await page.locator('.classroom-tool-link').click();
+
+  await expect(page).toHaveURL(/\/critique-wheel\/$/);
+  await expect(page).toHaveTitle('Critique wheel | Truth-Telling 101');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Critique wheel');
+  await expect(page.locator('body')).not.toContainText('CUNY');
+
+  const roster = page.getByRole('textbox', { name: 'Participant names' });
+  await expect(
+    page.getByRole('button', { name: 'Randomize presentation order' })
+  ).toBeDisabled();
+  await roster.fill('Alex\nSam\nAlex');
+  await expect(page.locator('#roster-count')).toHaveText('3 names entered');
+  await page.getByRole('button', { name: 'Randomize presentation order' }).click();
+
+  await expect(page.getByRole('heading', { name: 'Who presents first?' })).toBeVisible();
+  const orderEntries = page.locator('.presentation-order');
+  await expect(orderEntries.locator('li')).toHaveCount(3);
+  for (const label of ['Alex (1)', 'Sam', 'Alex (2)']) {
+    await expect(orderEntries.getByText(label, { exact: true })).toBeVisible();
+  }
+  await page.getByRole('button', { name: 'Begin the session' }).click();
+
+  await expect(page.getByRole('heading', { level: 1 })).not.toHaveText('Critique wheel');
+  await expect(page.locator('.wheel-svg')).toHaveCount(2);
+  await page.getByRole('button', { name: 'Spin both wheels' }).click();
+  await expect(
+    page.getByRole('button', { name: 'The wheels are spinning' })
+  ).toBeDisabled();
+  await expect(page.locator('.feedback-log li')).toHaveCount(1, { timeout: 5000 });
+  await expect(page.locator('.wheel-result')).not.toHaveText([
+    'Reviewer',
+    'Feedback prompt'
+  ]);
+
+  await page.getByRole('button', { name: 'Start over with this roster' }).click();
+  await expect(roster).toHaveValue('Alex\nSam\nAlex');
+  await page.reload();
+  await expect(page.getByRole('textbox', { name: 'Participant names' })).toHaveValue('');
 });
 
 test('renders the published week one page', async ({ page }) => {

@@ -483,6 +483,55 @@ h3 {
   opacity: 0.6;
 }
 
+.classroom-tool {
+  display: flex;
+  max-width: 760px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 24px;
+  padding: 24px;
+  background: var(--surface);
+  border-left: 4px solid var(--sva-orange);
+}
+
+.classroom-tool h3 {
+  margin: 8px 0;
+  color: var(--sva-charcoal);
+  font-family: var(--font-body);
+  font-size: 24px;
+}
+
+.classroom-tool p:last-child {
+  margin-bottom: 0;
+}
+
+.classroom-tool-link {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--sva-red);
+  color: var(--white);
+  font-family: var(--font-ui);
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.classroom-tool-link:hover,
+.classroom-tool-link:focus-visible {
+  background: var(--sva-charcoal);
+  color: var(--white);
+}
+
+.classroom-tool-link:focus-visible {
+  outline: 3px solid var(--sva-red);
+  outline-offset: 3px;
+}
+
 .week-number {
   color: var(--sva-red);
   font-family: var(--font-ui);
@@ -735,6 +784,13 @@ h3 {
   border: 1px solid var(--sva-blue);
 }
 
+@media (min-width: 1025px) {
+  .lesson-deck {
+    width: min(1200px, calc(100vw - 48px));
+    max-width: none;
+  }
+}
+
 .week-body .deck-link {
   margin-top: 8px;
   font-size: 14px;
@@ -904,6 +960,17 @@ a:focus-visible {
     padding: 12px;
   }
 
+  .classroom-tool {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 16px;
+    padding: 12px;
+  }
+
+  .classroom-tool h3 {
+    font-size: 20px;
+  }
+
   .script-card h3 {
     margin: 8px 0 6px;
     font-size: 20px;
@@ -1002,6 +1069,12 @@ a:focus-visible {
   .instructor-avatar,
   .speaker-portrait {
     display: none;
+  }
+
+  .classroom-tool-link {
+    color: #000;
+    background: #fff;
+    border: 1px solid #000;
   }
 
   .masthead,
