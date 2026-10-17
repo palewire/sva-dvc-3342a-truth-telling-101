@@ -179,17 +179,23 @@ test('lets the lecture deck widen on desktop and fit the mobile text column', as
   const deck = page.locator('.lesson-deck');
   const desktopWidths = await deck.evaluate((iframe) => ({
     deck: iframe.getBoundingClientRect().width,
-    text: iframe.closest('.week-content')?.getBoundingClientRect().width ?? 0
+    text: iframe.closest('.week-content')?.getBoundingClientRect().width ?? 0,
+    linkRight: document.querySelector('.deck-link a')?.getBoundingClientRect().right ?? 0,
+    deckRight: iframe.getBoundingClientRect().right
   }));
   expect(desktopWidths.deck).toBeGreaterThan(desktopWidths.text);
+  expect(desktopWidths.linkRight).toBeCloseTo(desktopWidths.deckRight, 0);
 
   await page.setViewportSize({ width: 390, height: 844 });
   const mobileWidths = await deck.evaluate((iframe) => ({
     deck: iframe.getBoundingClientRect().width,
     text: iframe.closest('.week-content')?.getBoundingClientRect().width ?? 0,
+    linkRight: document.querySelector('.deck-link a')?.getBoundingClientRect().right ?? 0,
+    deckRight: iframe.getBoundingClientRect().right,
     page: document.documentElement.scrollWidth
   }));
   expect(mobileWidths.deck).toBeCloseTo(mobileWidths.text, 0);
+  expect(mobileWidths.linkRight).toBeCloseTo(mobileWidths.deckRight, 0);
   expect(mobileWidths.page).toBe(390);
 });
 
