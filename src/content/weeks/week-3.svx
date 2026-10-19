@@ -25,9 +25,9 @@ Our inspiration is a piece published in the early weeks of the coronavirus pande
 
 "I'm not a data journalist," Lerner, who now works at ProPublica, told me in a phone interview. "I don't think of myself that way."
 
-But she did have an interest in the longstanding disparities in outcomes measured by public health scientists, and a lingering curiosity about how the city's vital statistics reports could be used to cover them.
+But she did have an interest in the longstanding disparities measured by public health scientists, and a lingering curiosity about how the city's vital statistics reports could be used to cover them.
 
-And then, suddenly, when a mysterious new virus swept across the city, she sensed that the moment had come to put that data to work.
+When a mysterious new virus swept across the city, she sensed that the moment had come to put that data to work.
 
 Whether she calls herself a data journalist or not, that was Lerner displaying the data state of mind I've promoted in class. Once she had the idea, she grabbed the data the city was publishing, lassoed in the Census figures needed to provide the missing context and, boom, she had a story.
 
