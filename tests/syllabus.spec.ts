@@ -249,6 +249,21 @@ test('runs the critique wheel without saving or hard-coding a roster', async ({
   await expect(roster).toHaveValue('Alex\nSam\nAlex');
   await page.reload();
   await expect(page.getByRole('textbox', { name: 'Participant names' })).toHaveValue('');
+
+  const promptInput = page.getByRole('textbox', { name: 'Feedback prompts' });
+  await expect(promptInput).toHaveValue(
+    'Name a strength\nAsk a question\nSuggest a next step'
+  );
+  await roster.fill('Alex\nSam');
+  await promptInput.fill('Ask a question');
+  await page.getByRole('button', { name: 'Randomize presentation order' }).click();
+  await page.getByRole('button', { name: 'Begin the session' }).click();
+
+  await expect(page.locator('.wheel-svg')).toHaveCount(1);
+  await page.getByRole('button', { name: 'Spin reviewer wheel' }).click();
+  await expect(page.locator('.feedback-log li')).toContainText('Ask a question', {
+    timeout: 5000
+  });
 });
 
 test('renders the published week one page', async ({ page }) => {

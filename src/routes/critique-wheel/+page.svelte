@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { base } from '$app/paths';
-
   type Phase = 'setup' | 'order' | 'session' | 'complete';
 
   interface Participant {
@@ -19,11 +17,7 @@
     prompt: FeedbackPrompt;
   }
 
-  const PROMPTS: FeedbackPrompt[] = [
-    { short: 'Strength', full: 'Name a strength' },
-    { short: 'Question', full: 'Ask a question' },
-    { short: 'Next step', full: 'Suggest a next step' }
-  ];
+  const DEFAULT_PROMPTS = ['Name a strength', 'Ask a question', 'Suggest a next step'];
   const WHEEL_COLORS = [
     { fill: '#d21c00', text: '#ffffff' },
     { fill: '#29b5cf', text: '#292929' },
@@ -37,6 +31,7 @@
 
   let phase = $state<Phase>('setup');
   let rawRoster = $state('');
+  let rawPrompts = $state(DEFAULT_PROMPTS.join('\n'));
   let presentationOrder = $state<Participant[]>([]);
   let presenterIndex = $state(0);
   let completedParticipantIds = $state<number[]>([]);
@@ -66,9 +61,18 @@
     });
   });
 
-  const setupError = $derived(
-    participants.length < 2 ? 'Enter at least two names, one per line.' : ''
+  const prompts = $derived.by(() =>
+    rawPrompts
+      .split(/\r?\n/)
+      .map((prompt) => prompt.trim())
+      .filter(Boolean)
+      .map((prompt) => ({ short: prompt, full: prompt }))
   );
+  const setupError = $derived.by(() => {
+    if (participants.length < 2) return 'Enter at least two names, one per line.';
+    if (prompts.length === 0) return 'Enter at least one feedback prompt.';
+    return '';
+  });
   const currentPresenter = $derived(presentationOrder[presenterIndex]);
   const audience = $derived(
     currentPresenter
@@ -173,14 +177,17 @@
 
     const participant =
       eligibleAudience[Math.floor(Math.random() * eligibleAudience.length)];
-    const promptIndex = Math.floor(Math.random() * PROMPTS.length);
+    const promptIndex =
+      prompts.length === 1 ? 0 : Math.floor(Math.random() * prompts.length);
     if (!participant) return;
 
     const audienceIndex = audience.findIndex((item) => item.id === participant.id);
     pendingParticipantId = participant.id;
     pendingPromptIndex = promptIndex;
     wheelRotation = rotationForTarget(wheelRotation, audienceIndex, audience.length);
-    promptRotation = rotationForTarget(promptRotation, promptIndex, PROMPTS.length);
+    if (prompts.length > 1) {
+      promptRotation = rotationForTarget(promptRotation, promptIndex, prompts.length);
+    }
     isSpinning = true;
 
     const duration = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -190,7 +197,7 @@
       const selectedParticipant = audience.find(
         (item) => item.id === pendingParticipantId
       );
-      const selectedPrompt = PROMPTS[pendingPromptIndex ?? -1];
+      const selectedPrompt = prompts[pendingPromptIndex ?? -1];
       if (!selectedParticipant || !selectedPrompt) return;
 
       completedParticipantIds = [...completedParticipantIds, selectedParticipant.id];
@@ -237,8 +244,6 @@
 
 <main id="main-content" class="critique-page" tabindex="-1">
   <div class="container critique-container">
-    <a class="back-link" href={base + '/'}>← Back to the course page</a>
-
     {#if phase === 'setup'}
       <header class="critique-header">
         <p class="critique-kicker">Truth-Telling 101 · Classroom tool</p>
@@ -269,6 +274,22 @@
         <p class="roster-count" id="roster-count" aria-live="polite">
           {participants.length}
           {participants.length === 1 ? 'name' : 'names'} entered
+        </p>
+        <label for="prompt-input">Feedback prompts</label>
+        <textarea
+          id="prompt-input"
+          bind:value={rawPrompts}
+          rows="4"
+          placeholder="Enter one prompt per line"
+          aria-describedby="prompt-help prompt-count"
+        ></textarea>
+        <p class="prompt-help" id="prompt-help">
+          Enter one prompt per line. A single prompt is used for every response; two or
+          more prompts create a second wheel.
+        </p>
+        <p class="roster-count" id="prompt-count" aria-live="polite">
+          {prompts.length}
+          {prompts.length === 1 ? 'prompt' : 'prompts'} entered
         </p>
         {#if setupError}
           <p class="setup-error" role="alert">{setupError}</p>
@@ -319,7 +340,13 @@
           <p>Each other participant gets one turn to respond.</p>
         </header>
 
-        <section class="wheels" aria-label="Reviewer and feedback prompt wheels">
+        <section
+          class="wheels"
+          class:single-wheel={prompts.length === 1}
+          aria-label={prompts.length === 1
+            ? 'Reviewer wheel'
+            : 'Reviewer and feedback prompt wheels'}
+        >
           <div class="wheel-card">
             <h2>Who responds?</h2>
             <div class="wheel-frame">
@@ -383,62 +410,64 @@
             </p>
           </div>
 
-          <div class="wheel-card">
-            <h2>How to respond?</h2>
-            <div class="wheel-frame">
-              <span class="wheel-pointer" aria-hidden="true">▼</span>
-              <svg
-                class="wheel-svg"
-                viewBox="0 0 360 360"
-                role="img"
-                aria-label="Feedback prompt wheel"
-              >
-                <g
-                  class="wheel-rotor"
-                  style="transform: rotate({promptRotation}deg); transition-duration: {SPIN_DURATION}ms;"
+          {#if prompts.length > 1}
+            <div class="wheel-card">
+              <h2>How to respond?</h2>
+              <div class="wheel-frame">
+                <span class="wheel-pointer" aria-hidden="true">▼</span>
+                <svg
+                  class="wheel-svg"
+                  viewBox="0 0 360 360"
+                  role="img"
+                  aria-label="Feedback prompt wheel"
                 >
-                  {#each PROMPTS as prompt, index (prompt.short)}
-                    {@const position = segmentLabelPosition(index, PROMPTS.length)}
-                    {@const color = WHEEL_COLORS[index % WHEEL_COLORS.length]}
-                    <path
-                      d={segmentPath(index, PROMPTS.length)}
-                      fill={color.fill}
-                      stroke="#ffffff"
-                      stroke-width="2"
-                    />
-                    <text
-                      x={position.x}
-                      y={position.y}
-                      text-anchor="middle"
-                      dominant-baseline="middle"
-                      fill={color.text}
-                      font-size="13"
-                      font-weight="700"
-                      transform="rotate({position.rotation}, {position.x}, {position.y})"
-                    >
-                      {prompt.short}
-                    </text>
-                  {/each}
-                  <circle cx="180" cy="180" r="20" fill="#ffffff" />
-                </g>
-                <circle
-                  cx="180"
-                  cy="180"
-                  r="164"
-                  fill="none"
-                  stroke="#494949"
-                  stroke-width="2"
-                />
-              </svg>
+                  <g
+                    class="wheel-rotor"
+                    style="transform: rotate({promptRotation}deg); transition-duration: {SPIN_DURATION}ms;"
+                  >
+                    {#each prompts as prompt, index (prompt.short)}
+                      {@const position = segmentLabelPosition(index, prompts.length)}
+                      {@const color = WHEEL_COLORS[index % WHEEL_COLORS.length]}
+                      <path
+                        d={segmentPath(index, prompts.length)}
+                        fill={color.fill}
+                        stroke="#ffffff"
+                        stroke-width="2"
+                      />
+                      <text
+                        x={position.x}
+                        y={position.y}
+                        text-anchor="middle"
+                        dominant-baseline="middle"
+                        fill={color.text}
+                        font-size="13"
+                        font-weight="700"
+                        transform="rotate({position.rotation}, {position.x}, {position.y})"
+                      >
+                        {truncate(prompt.short, labelLimit(prompts.length))}
+                      </text>
+                    {/each}
+                    <circle cx="180" cy="180" r="20" fill="#ffffff" />
+                  </g>
+                  <circle
+                    cx="180"
+                    cy="180"
+                    r="164"
+                    fill="none"
+                    stroke="#494949"
+                    stroke-width="2"
+                  />
+                </svg>
+              </div>
+              <p class="wheel-result" aria-live="polite">
+                {#if roundResults.length}
+                  {roundResults[roundResults.length - 1]?.prompt.full}
+                {:else}
+                  Feedback prompt
+                {/if}
+              </p>
             </div>
-            <p class="wheel-result" aria-live="polite">
-              {#if roundResults.length}
-                {roundResults[roundResults.length - 1]?.prompt.full}
-              {:else}
-                Feedback prompt
-              {/if}
-            </p>
-          </div>
+          {/if}
         </section>
 
         <div class="spin-control">
@@ -454,9 +483,17 @@
               class="tool-button tool-button-primary spin-button"
               onclick={handleSpin}
               disabled={isSpinning}
-              aria-label={isSpinning ? 'The wheels are spinning' : 'Spin both wheels'}
+              aria-label={isSpinning
+                ? 'The wheels are spinning'
+                : prompts.length === 1
+                  ? 'Spin reviewer wheel'
+                  : 'Spin both wheels'}
             >
-              {isSpinning ? 'Spinning…' : 'Spin both wheels'}
+              {isSpinning
+                ? 'Spinning…'
+                : prompts.length === 1
+                  ? 'Spin reviewer wheel'
+                  : 'Spin both wheels'}
             </button>
           {/if}
         </div>
@@ -474,7 +511,11 @@
               {/each}
             </ol>
           {:else}
-            <p>Spin to choose the first reviewer and prompt.</p>
+            <p>
+              Spin to choose the first reviewer{prompts.length === 1
+                ? '.'
+                : ' and prompt.'}
+            </p>
           {/if}
         </section>
       {/if}
@@ -506,17 +547,6 @@
     max-width: 1000px;
   }
 
-  .back-link {
-    display: inline-block;
-    margin-bottom: 28px;
-    color: var(--sva-red-on-surface);
-    font-family: var(--font-ui);
-    font-weight: 700;
-    text-decoration: none;
-    text-transform: uppercase;
-  }
-
-  .back-link:hover,
   .text-button:hover {
     text-decoration: underline;
   }
@@ -609,6 +639,7 @@
   }
 
   .roster-count,
+  .prompt-help,
   .privacy-note {
     margin: 8px 0 0;
     color: var(--sva-copy);
@@ -715,6 +746,12 @@
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 24px;
+  }
+
+  .wheels.single-wheel {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 488px;
+    margin-inline: auto;
   }
 
   .wheel-card {
@@ -882,7 +919,6 @@
       background: #fff;
     }
 
-    .back-link,
     .tool-button,
     .text-button {
       display: none;
