@@ -13,7 +13,7 @@ Building on the basics of interviewing data we covered [last week](./week-2), th
 
 ## Part 1: Tonight's role model
 
-Our inspiration is a piece published in the early weeks of the coronavirus pandemic by [Sharon Lerner](https://www.propublica.org/people/sharon-lerner), then a reporter at the Intercept. It's titled "Coronavirus numbers reflect New York City's deep economic divide."
+Our inspiration is a piece published in the early weeks of the coronavirus pandemic by [Sharon Lerner](https://www.propublica.org/people/sharon-lerner), then a reporter at The Intercept. It's titled ["Coronavirus numbers reflect New York City's deep economic divide."](https://theintercept.com/2020/04/09/nyc-coronavirus-deaths-race-economic-divide)
 
 <Screenshot
   src="/screenshots/week-3/intercept-coronavirus-story.png"
