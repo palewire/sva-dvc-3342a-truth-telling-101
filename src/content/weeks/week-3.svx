@@ -1,0 +1,63 @@
+---
+title: 'Calculating Context'
+summary: 'How journalists merge outside datasets to add missing context to a primary source'
+week: 3
+---
+
+we'll return to Google Sheets and work through this week's hands-on exercise, which will teach you how to merge in outside datasets to introduce context missing from your primary source.
+
+Our inspiration is a piece published in the early weeks of the coronavirus pandemic by Sharon Lerner, then a reporter at the Intercept. It's titled "Coronavirus numbers reflect New York City's deep economic divide."
+
+"I'm not a data journalist," Lerner, who now works at ProPublica, told me in a phone interview.  "I don't think of myself that way."
+
+But she did have an interest in the longstanding disparities in outcomes measured by public health scientists, and a lingering curiosity about how the city's vital statistics reports could be used to cover them.
+
+And then, suddenly, when a mysterious new virus swept across the city, she sensed that the moment had come to put that data to work.
+
+Whether she calls herself a data journalism or not, that was Lerner displaying the data state of mind I've promoted in class. Once she had the idea, she grabbed the data the city was publishing, lassoed in the Census figures needed to provide the missing context and, boom, she had a story.
+
+"They were pretty simple calculations," Lerner said. "It was obviously a very rudimentary approach but you could already see these patterns. "
+
+Tonight, we'll follow in her footsteps by working through an updated version of the city's COVID statistics, learning how to use merge ZIP code totals with Census data to see if the trend that Lerner identified early on in the coronavirus story held up over the years that followed.
+
+## Part 1: Meet the COVID data
+
+Download [`data-by-modzcta.csv`](https://raw.githubusercontent.com/nychealth/coronavirus-data/master/totals/data-by-modzcta.csv) from the archived [NYC Health coronavirus data repository](https://github.com/nychealth/coronavirus-data).
+
+Open a new Google Sheets workbook and import the CSV into a new tab. Eyeball the columns, including the modified ZIP code, case and death counts, case and death rates, and population denominator.
+
+## Part 2: Add Census context
+
+Go to [data.census.gov](https://data.census.gov) and find the 2023 ACS five-year tables for New York ZIP Code Tabulation Areas. Use the [income table](https://data.census.gov/table/ACSDT5Y2023.B19013), the [income and poverty profile](https://data.census.gov/table/ACSDP5Y2023.DP03), and the [race table](https://data.census.gov/table/ACSDP5Y2023.DP05).
+
+Select the ZIP codes and fields you need, then download the Census table. Import it into its own Sheets tab.
+
+<Aside title="Check the ACS year">
+  <p>Census rotates the ACS vintage from year to year. Confirm that these table links still resolve before class and use the current five-year release if the 2023 tables are no longer the latest available.</p>
+</Aside>
+
+## Part 3: Connect the ZIP codes
+
+Download [`ZCTA-to-MODZCTA.csv`](https://raw.githubusercontent.com/nychealth/coronavirus-data/master/Geography-resources/ZCTA-to-MODZCTA.csv) from the same archived [GitHub repository](https://github.com/nychealth/coronavirus-data).
+
+Import the crosswalk into its own Sheets tab.
+
+Add a column to the Census tab. Use `XLOOKUP` to match each ZCTA to the crosswalk and return its MODZCTA.
+
+Add columns to the COVID tab. Use `XLOOKUP` by MODZCTA to pull in median income and the race classification.
+
+Spot-check the 37 ZIP codes that do not match one-to-one. Look at examples such as Rockefeller Center and the Grand Central towers, and confirm that the crosswalk resolved them correctly.
+
+## Part 4: Compare the results
+
+Sort or group the COVID data by income tier and then by race majority.
+
+Compare your results to [Sharon Lerner's 2020 story](https://theintercept.com/2020/04/09/nyc-coronavirus-deaths-race-economic-divide). Look for the pattern she identified and consider whether it held up over the years that followed.
+
+## Part 5: Check the catches
+
+Before drawing conclusions, document the limits of the data.
+
+- Check which year the pre-computed rate uses for its population denominator.
+- Note the break between confirmed and probable death counts in April 2023.
+- Treat small-sample MODZCTAs with caution.
