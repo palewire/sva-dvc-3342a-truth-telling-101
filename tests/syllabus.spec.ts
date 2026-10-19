@@ -154,7 +154,7 @@ test('links the published classroom scripts', async ({ page }) => {
 
   const cards = page.locator('.script-card');
   await expect(cards).toHaveCount(6);
-  await expect(page.locator('.script-card-disabled')).toHaveCount(4);
+  await expect(page.locator('.script-card-disabled')).toHaveCount(3);
 
   const week1 = cards.nth(0);
   await expect(week1).toHaveAttribute('href', `${basePath}/weeks/week-1/`);
@@ -165,6 +165,11 @@ test('links the published classroom scripts', async ({ page }) => {
   await expect(week2).toHaveAttribute('href', `${basePath}/weeks/week-2/`);
   await expect(week2.locator('h3')).toHaveText('Interviewing data');
   await expect(week2.locator('p')).toHaveText('Monday, Oct. 12, 2026');
+
+  const week3 = cards.nth(2);
+  await expect(week3).toHaveAttribute('href', `${basePath}/weeks/week-3/`);
+  await expect(week3.locator('h3')).toHaveText('Calculating context');
+  await expect(week3.locator('p')).toHaveText('Monday, Oct. 19, 2026');
 
   const sections = page.locator('main > section');
   await expect(sections.nth((await sections.count()) - 1)).toHaveAttribute(
