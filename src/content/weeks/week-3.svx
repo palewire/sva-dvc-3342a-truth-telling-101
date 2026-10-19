@@ -193,3 +193,23 @@ Now look carefully at the results. You should see several warts in the data that
 Then compare your results to [Sharon Lerner's 2020 story](https://theintercept.com/2020/04/09/nyc-coronavirus-deaths-race-economic-divide). Look for the pattern she identified and consider whether it held up over the years that followed.
 
 We'll take a moment to do that together as a class and see what we find.
+
+## Homework Assignments
+
+### Task 1: Find two datasets that belong together
+
+Come up with a measurable question that cannot be fully answered with one dataset alone. Then find a dataset that can add useful context, such as population, income, race, housing conditions or geography.
+
+### Task 2: Complete a first join
+
+Import both datasets into Google Sheets and use `XLOOKUP` to bring at least one useful field from the contextual dataset into the primary dataset.
+
+Inspect the result. How many rows matched? Which rows did not match?
+
+### Task 3: Find an answer
+
+Use your joined dataset to ask questions and develop a finding. Look for a comparison, pattern or trend that was not visible before you added the contextual data.
+
+### Task 4: Prepare to present
+
+Be ready to explain your finding to the class, share the evidence behind it and one limitation or complication in the data.
