@@ -232,7 +232,7 @@
 </script>
 
 <svelte:head>
-  <title>Critique wheel | Truth-Telling 101</title>
+  <title>Wheel of Feedback | Truth-Telling 101</title>
   <meta
     name="description"
     content="A classroom tool for organizing presentation order and peer feedback in Truth-Telling 101."
@@ -246,12 +246,8 @@
   <div class="container critique-container">
     {#if phase === 'setup'}
       <header class="critique-header">
-        <p class="critique-kicker">Truth-Telling 101 · Classroom tool</p>
-        <h1>Critique wheel</h1>
-        <p>
-          Set a presentation order, then let chance choose a reviewer and a useful way to
-          respond.
-        </p>
+        <p class="critique-kicker">Truth-Telling 101</p>
+        <h1>Wheel of Feedback</h1>
       </header>
 
       <section class="setup-panel" aria-labelledby="roster-title">
@@ -540,11 +536,11 @@
   .critique-page {
     min-height: calc(100vh - 60px);
     padding-block: 24px 80px;
-    background: var(--surface);
+    background: var(--white);
   }
 
   .critique-container {
-    max-width: 1000px;
+    max-width: 828px;
   }
 
   .text-button:hover {
@@ -750,8 +746,16 @@
 
   .wheels.single-wheel {
     grid-template-columns: minmax(0, 1fr);
-    max-width: 488px;
+    max-width: 780px;
     margin-inline: auto;
+  }
+
+  .wheels.single-wheel .wheel-card {
+    width: fit-content;
+  }
+
+  .wheels.single-wheel .wheel-frame {
+    margin-inline: 0;
   }
 
   .wheel-card {

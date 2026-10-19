@@ -213,9 +213,16 @@ test('runs the critique wheel without saving or hard-coding a roster', async ({
   await page.goto('./critique-wheel/');
 
   await expect(page).toHaveURL(/\/critique-wheel\/$/);
-  await expect(page).toHaveTitle('Critique wheel | Truth-Telling 101');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Critique wheel');
+  await expect(page).toHaveTitle('Wheel of Feedback | Truth-Telling 101');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Wheel of Feedback');
   await expect(page.locator('body')).not.toContainText('CUNY');
+  const mastheadLeft = await page
+    .locator('.brand')
+    .evaluate((element) => element.getBoundingClientRect().left);
+  const panelLeft = await page
+    .locator('.setup-panel')
+    .evaluate((element) => element.getBoundingClientRect().left);
+  expect(mastheadLeft).toBeCloseTo(panelLeft, 0);
 
   const roster = page.getByRole('textbox', { name: 'Participant names' });
   await expect(
@@ -233,7 +240,9 @@ test('runs the critique wheel without saving or hard-coding a roster', async ({
   }
   await page.getByRole('button', { name: 'Begin the session' }).click();
 
-  await expect(page.getByRole('heading', { level: 1 })).not.toHaveText('Critique wheel');
+  await expect(page.getByRole('heading', { level: 1 })).not.toHaveText(
+    'Wheel of Feedback'
+  );
   await expect(page.locator('.wheel-svg')).toHaveCount(2);
   await page.getByRole('button', { name: 'Spin both wheels' }).click();
   await expect(
