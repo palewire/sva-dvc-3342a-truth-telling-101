@@ -11,7 +11,7 @@ test('shows the SVA course facts without artwork in the hero', async ({ page }) 
   await page.goto('./');
 
   await expect(page).toHaveTitle(
-    'Truth-Telling 101: Artists Meet Data Journalism | SVA Continuing Education'
+    "Truth-Telling 101: how New York's leading newsrooms turn raw data into compelling journalism | SVA Continuing Education"
   );
   await expect(page.locator('meta[name="description"]')).toHaveAttribute(
     'content',
@@ -142,7 +142,7 @@ test('links the instructor photo to the bio page', async ({ page }) => {
   await expect(emailLink).toHaveCSS('outline-color', 'rgb(230, 31, 0)');
 });
 
-test('links the first classroom script when it is published', async ({ page }) => {
+test('links the published classroom scripts', async ({ page }) => {
   await page.goto('./');
 
   await expect(page.locator('.meeting-dates')).toHaveCount(0);
@@ -151,13 +151,26 @@ test('links the first classroom script when it is published', async ({ page }) =
   await expect(page.locator('#schedule .section-intro')).toHaveText(
     'All of the materials we cover will be made available after class.'
   );
-  await expect(page.locator('.script-card')).toHaveCount(1);
-  await expect(page.locator('.script-card')).toHaveAttribute(
-    'href',
-    `${basePath}/weeks/week-1/`
-  );
-  await expect(page.locator('.script-card h3')).toHaveText('Social science in a hurry');
-  await expect(page.locator('.script-card p')).toHaveText('October 5, 2026');
+
+  const cards = page.locator('.script-card');
+  await expect(cards).toHaveCount(6);
+  await expect(page.locator('.script-card-disabled')).toHaveCount(3);
+
+  const week1 = cards.nth(0);
+  await expect(week1).toHaveAttribute('href', `${basePath}/weeks/week-1/`);
+  await expect(week1.locator('h3')).toHaveText('Social science in a hurry');
+  await expect(week1.locator('p')).toHaveText('October 5, 2026');
+
+  const week2 = cards.nth(1);
+  await expect(week2).toHaveAttribute('href', `${basePath}/weeks/week-2/`);
+  await expect(week2.locator('h3')).toHaveText('Interviewing data');
+  await expect(week2.locator('p')).toHaveText('Monday, Oct. 12, 2026');
+
+  const week3 = cards.nth(2);
+  await expect(week3).toHaveAttribute('href', `${basePath}/weeks/week-3/`);
+  await expect(week3.locator('h3')).toHaveText('Calculating context');
+  await expect(week3.locator('p')).toHaveText('Monday, Oct. 19, 2026');
+
   const sections = page.locator('main > section');
   await expect(sections.nth((await sections.count()) - 1)).toHaveAttribute(
     'id',
@@ -242,7 +255,7 @@ test('renders the published week one page', async ({ page }) => {
   await page.goto('./weeks/week-1/');
 
   await expect(page).toHaveTitle(
-    'Social science in a hurry | Truth-Telling 101: Artists Meet Data Journalism'
+    "Social science in a hurry | Truth-Telling 101: How New York's leading newsrooms turn raw data into compelling journalism"
   );
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
     'Social science in a hurry'
@@ -307,9 +320,9 @@ test('fits a phone screen and supports the keyboard skip link', async ({ page })
     () => document.documentElement.scrollWidth - document.documentElement.clientWidth
   );
   expect(overflow).toBeLessThanOrEqual(1);
-  const scriptCard = page.locator('.script-card');
+  const scriptCard = page.locator('.script-card').first();
   const skillCard = page.locator('.course-skill').first();
-  await expect(scriptCard).toHaveCount(1);
+  await expect(page.locator('.script-card')).toHaveCount(6);
   await expect(page.locator('.speaker-card')).toHaveCount(3);
   await expect(scriptCard).toHaveCSS('padding', '12px');
   await expect(skillCard).toHaveCSS('padding', '12px');
@@ -317,7 +330,7 @@ test('fits a phone screen and supports the keyboard skip link', async ({ page })
   await expect(page.locator('.section-header h2').first()).toHaveCSS('font-size', '26px');
   await expect(page.locator('.section-intro').first()).toHaveCSS('font-size', '16px');
   await expect(page.locator('.course-skill h3').first()).toHaveCSS('font-size', '16px');
-  await expect(page.locator('.script-card h3')).toHaveCSS('font-size', '20px');
+  await expect(page.locator('.script-card h3').first()).toHaveCSS('font-size', '20px');
   for (const portrait of await page.locator('.speaker-portrait').all()) {
     await expect(portrait).toHaveCSS('background-color', 'rgb(30, 150, 184)');
     await expect(portrait).toHaveCSS('border-radius', '0px');
@@ -357,7 +370,7 @@ test('prints the syllabus in black on white without navigation or portrait block
   for (const portrait of await page.locator('.speaker-portrait').all()) {
     await expect(portrait).toBeHidden();
   }
-  await expect(page.locator('.script-card')).toHaveCount(1);
+  await expect(page.locator('.script-card')).toHaveCount(6);
   expect(
     await page
       .locator('.hero')
