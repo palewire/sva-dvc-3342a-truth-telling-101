@@ -37,11 +37,43 @@ Tonight, we'll follow in her footsteps by working through an updated version of 
 
 ## Part 2: The latest tally
 
-Download [`data-by-modzcta.csv`](https://raw.githubusercontent.com/nychealth/coronavirus-data/master/totals/data-by-modzcta.csv) from the archived [NYC Health coronavirus data repository](https://github.com/nychealth/coronavirus-data).
+The webpage that Lerner accessed is long gone, one of many coronavirus dashboards hastily rushed onto the web.
 
-Open a new Google Sheets workbook and import the CSV into a new tab. Eyeball the columns, including the modified ZIP code, case and death counts, case and death rates, and population denominator.
+A more recent accounting of the city's COVID statistics is available on GitHub, a popular site owned by Microsoft where developers commonly share open-source code and data. There you can find [a repository named coronavirus-data](https://github.com/nychealth/coronavirus-data) maintained by the NYC Department of Health and Mental Hygiene.
 
-## Part 2: Add Census context
+<Screenshot
+  src="/screenshots/week-3/nyc-health-coronavirus-repository.png"
+  alt="The archived NYC Health coronavirus-data repository on GitHub"
+  chromeTitle="GitHub"
+  chromeUrl="https://github.com/nychealth/coronavirus-data"
+  imgWidth={1024}
+  imgHeight={768}
+/>
+
+Click into the "totals" folder. There, you'll find a file called [`data-by-modzcta.csv`](https://github.com/nychealth/coronavirus-data/blob/master/totals/data-by-modzcta.csv). This features case and death counts, already adjusted for population size, with each row representing something called a "MODZCTA." Click the "raw" button in the upper-right corner to view the raw CSV data. Download it to your computer.
+
+<Screenshot
+  src="/screenshots/week-3/nyc-health-covid-data-file.png"
+  alt="GitHub preview of the data-by-modzcta.csv file with COVID case and death counts by modified ZIP code"
+  chromeTitle="GitHub"
+  chromeUrl="https://github.com/nychealth/coronavirus-data/blob/master/totals/data-by-modzcta.csv"
+  imgWidth={1024}
+  imgHeight={768}
+/>
+
+Open a new Google Sheets workbook and import the CSV into a new tab.
+
+<Screenshot
+  src="/screenshots/week-3/google-sheets-covid-data-imported.png"
+  alt="Google Sheets workbook with the data-by-modzcta.csv file imported into a tab"
+  showChrome={false}
+  imgWidth={1024}
+  imgHeight={768}
+/>
+
+Give the same once over we've been trained to give every dataset. Don't move on until you actually find official definitions of each column, and answer the elusive question: "What the hell is a MODZCTA?""
+
+## Part 3: Add context from the Census
 
 Go to [data.census.gov](https://data.census.gov) and find the 2023 ACS five-year tables for New York ZIP Code Tabulation Areas. Use the [income table](https://data.census.gov/table/ACSDT5Y2023.B19013), the [income and poverty profile](https://data.census.gov/table/ACSDP5Y2023.DP03), and the [race table](https://data.census.gov/table/ACSDP5Y2023.DP05).
 
