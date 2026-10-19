@@ -1,26 +1,41 @@
 ---
-title: 'Calculating Context'
-summary: 'How journalists merge outside datasets to add missing context to a primary source'
+title: 'Calculating context'
+summary: 'How demographic data can be used to enrich understanding'
 week: 3
 ---
 
-we'll return to Google Sheets and work through this week's hands-on exercise, which will teach you how to merge in outside datasets to introduce context missing from your primary source.
+<script>
+  import Aside from '$lib/components/Aside.svelte';
+  import Screenshot from '$lib/components/Screenshot.svelte';
+</script>
 
-Our inspiration is a piece published in the early weeks of the coronavirus pandemic by Sharon Lerner, then a reporter at the Intercept. It's titled "Coronavirus numbers reflect New York City's deep economic divide."
+Building on the basics of interviewing data we covered [last week](./week-2), this lesson will show you how to merge in outside datasets to introduce context that's missing from your primary source.
 
-"I'm not a data journalist," Lerner, who now works at ProPublica, told me in a phone interview.  "I don't think of myself that way."
+## Part 1: Tonight's role model
+
+Our inspiration is a piece published in the early weeks of the coronavirus pandemic by [Sharon Lerner](https://www.propublica.org/people/sharon-lerner), then a reporter at the Intercept. It's titled "Coronavirus numbers reflect New York City's deep economic divide."
+
+<Screenshot
+  src="/screenshots/week-3/intercept-coronavirus-story.png"
+  alt="The Intercept article Coronavirus numbers reflect New York City's deep economic divide"
+  showChrome={false}
+  imgWidth={1024}
+  imgHeight={768}
+/>
+
+"I'm not a data journalist," Lerner, who now works at ProPublica, told me in a phone interview. "I don't think of myself that way."
 
 But she did have an interest in the longstanding disparities in outcomes measured by public health scientists, and a lingering curiosity about how the city's vital statistics reports could be used to cover them.
 
 And then, suddenly, when a mysterious new virus swept across the city, she sensed that the moment had come to put that data to work.
 
-Whether she calls herself a data journalism or not, that was Lerner displaying the data state of mind I've promoted in class. Once she had the idea, she grabbed the data the city was publishing, lassoed in the Census figures needed to provide the missing context and, boom, she had a story.
+Whether she calls herself a data journalist or not, that was Lerner displaying the data state of mind I've promoted in class. Once she had the idea, she grabbed the data the city was publishing, lassoed in the Census figures needed to provide the missing context and, boom, she had a story.
 
-"They were pretty simple calculations," Lerner said. "It was obviously a very rudimentary approach but you could already see these patterns. "
+"They were pretty simple calculations," Lerner said. "It was obviously a very rudimentary approach but you could already see these patterns."
 
-Tonight, we'll follow in her footsteps by working through an updated version of the city's COVID statistics, learning how to use merge ZIP code totals with Census data to see if the trend that Lerner identified early on in the coronavirus story held up over the years that followed.
+Tonight, we'll follow in her footsteps by working through an updated version of the city's COVID statistics, learning how to merge ZIP code totals with Census data to see if the trend that Lerner identified early on in the coronavirus story held up over the years that followed.
 
-## Part 1: Meet the COVID data
+## Part 2: The latest tally
 
 Download [`data-by-modzcta.csv`](https://raw.githubusercontent.com/nychealth/coronavirus-data/master/totals/data-by-modzcta.csv) from the archived [NYC Health coronavirus data repository](https://github.com/nychealth/coronavirus-data).
 

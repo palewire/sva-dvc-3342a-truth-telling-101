@@ -69,7 +69,8 @@ schedule:
     - number: 3
       date: '2026-10-19'
       displayDate: 'Monday, Oct. 19, 2026'
-      topic: 'Calculating Context'
+      topic: 'Calculating context'
+      href: /weeks/week-3/
     - number: 4
       date: '2026-10-26'
       displayDate: 'Monday, Oct. 26, 2026'
