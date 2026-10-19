@@ -71,40 +71,125 @@ Open a new Google Sheets workbook and import the CSV into a new tab.
   imgHeight={768}
 />
 
-Give the same once over we've been trained to give every dataset. Don't move on until you actually find official definitions of each column, and answer the elusive question: "What the hell is a MODZCTA?""
+Give the same once over we've been trained to give every dataset. Don't move on until you actually find official definitions of each column, and answer the elusive question: "What the hell is a MODZCTA?"
 
 ## Part 3: Add context from the Census
 
-Go to [data.census.gov](https://data.census.gov) and find the 2023 ACS five-year tables for New York ZIP Code Tabulation Areas. Use the [income table](https://data.census.gov/table/ACSDT5Y2023.B19013), the [income and poverty profile](https://data.census.gov/table/ACSDP5Y2023.DP03), and the [race table](https://data.census.gov/table/ACSDP5Y2023.DP05).
+Go to [data.census.gov](https://data.census.gov), the authoritative source for U.S. demographic data.
 
-Select the ZIP codes and fields you need, then download the Census table. Import it into its own Sheets tab.
+<Screenshot
+  src="/screenshots/week-3/census-data-homepage.png"
+  alt="The data.census.gov homepage with its search box and Explore Census Data heading"
+  chromeTitle="data.census.gov"
+  chromeUrl="https://data.census.gov"
+  imgWidth={1024}
+  imgHeight={768}
+/>
 
-<Aside title="Check the ACS year">
-  <p>Census rotates the ACS vintage from year to year. Confirm that these table links still resolve before class and use the current five-year release if the 2023 tables are no longer the latest available.</p>
-</Aside>
+Now the real fun begins. Because the Census gathers so much data, it can be extremely difficult to find the right table for your specific needs. We don't have time to go over everything here in detail; that could be an entire semester on its own.
 
-## Part 3: Connect the ZIP codes
+Instead, I'm going to give you a few pointers, like a more experienced colleague or a source might.
 
-Download [`ZCTA-to-MODZCTA.csv`](https://raw.githubusercontent.com/nychealth/coronavirus-data/master/Geography-resources/ZCTA-to-MODZCTA.csv) from the same archived [GitHub repository](https://github.com/nychealth/coronavirus-data).
+The table we're after is B19013, which contains the most commonly cited measure of household earnings: the median income.
 
-Import the crosswalk into its own Sheets tab.
+Since we're focusing on small ZIP code geographies, we'll need to use the five-year estimates from the annual American Community survey, which means trading off the freshness of the most recent one-year survey for the increased accuracy of five-year samples that reach many more people and therefore reduce the margin of error.
 
-Add a column to the Census tab. Use `XLOOKUP` to match each ZCTA to the crosswalk and return its MODZCTA.
+So you'll want to navigate to that table, find the little switch that flips to the most recent five-year estimate, and then select all ZCTAs in New York state in the sidebar. That will ultimately take you to a page like this one, where you should hit download to get the data zipped up with some documentation alongside a CSV.
 
-Add columns to the COVID tab. Use `XLOOKUP` by MODZCTA to pull in median income and the race classification.
+If you can't get there yourself, try [this link into the Census site](https://data.census.gov/table?q=B19013:+Median+Household+Income+in+the+Past+12+Months+(in+2024+Inflation-Adjusted+Dollars)&g=040XX00US36$8600000).
 
-Spot-check the 37 ZIP codes that do not match one-to-one. Look at examples such as Rockefeller Center and the Grand Central towers, and confirm that the crosswalk resolved them correctly.
+<Screenshot
+  src="/screenshots/week-3/census-income-table-download.png"
+  alt="Census data table B19013 filtered to New York ZIP Code Tabulation Areas with the Download Table Data link"
+  chromeTitle="data.census.gov"
+  chromeUrl="https://data.census.gov/table?q=B19013:+Median+Household+Income+in+the+Past+12+Months+(in+2024+Inflation-Adjusted+Dollars)&g=040XX00US36$8600000"
+  imgWidth={1024}
+  imgHeight={768}
+/>
 
-## Part 4: Compare the results
+Unzip that file and import the CSV into a new tab in your Google Sheets workbook. You do that by selecting "Insert new sheet" during the import process. After it's in, rename the tab to "census" for clarity.
 
-Sort or group the COVID data by income tier and then by race majority.
+<Screenshot
+  src="/screenshots/week-3/google-sheets-census-income-imported.png"
+  alt="Google Sheets workbook with the Census median household income table imported into a tab named census"
+  showChrome={false}
+  imgWidth={1024}
+  imgHeight={768}
+/>
 
-Compare your results to [Sharon Lerner's 2020 story](https://theintercept.com/2020/04/09/nyc-coronavirus-deaths-race-economic-divide). Look for the pattern she identified and consider whether it held up over the years that followed.
+Look carefully at your dataset and you'll see a problem. The NAME column that includes the ZIP Code has a ZCTA5 prefix that will make it difficult to merge this dataset with other tabs. We'll need to strip that before we're able to link up our datasets.
 
-## Part 5: Check the catches
+In this case, that can be accomplished by splitting off the last five characters of the NAME into a new column. That can be done in Google Sheets by using the `RIGHT` function, like this: `=RIGHT(B2, 5)`, where `B2` is the cell containing the NAME value.
 
-Before drawing conclusions, document the limits of the data.
+Rename the E column as ZCTA and then put that formula in the E2 cell. That will suggest an "autofill" of all the following cells using the same formula. You should accept that. If not, you can grab the box in the lower right corner of the cell and drag it down manually.
 
-- Check which year the pre-computed rate uses for its population denominator.
-- Note the break between confirmed and probable death counts in April 2023.
-- Treat small-sample MODZCTAs with caution.
+<Screenshot
+  src="/screenshots/week-3/google-sheets-census-zcta-autofill.png"
+  alt="Google Sheets suggesting an autofill after extracting ZIP codes into the Census tab's ZCTA column"
+  showChrome={false}
+  imgWidth={1024}
+  imgHeight={768}
+/>
+
+Have you figured out what the other columns in the dataset are? Look and see if you can find the answers in the metadata included in the Census ZIP file.
+
+## Part 4: Crosswalking ZCTAs
+
+Now all we're missing is a way to merge the traditional Census ZIP code areas with the city's custom MODZCTAs.
+
+In your earlier research, you should have found the [city's open-source crosswalk](https://github.com/nychealth/coronavirus-data/blob/master/Geography-resources/ZCTA-to-MODZCTA.csv) on GitHub. This will provide the crucial link between the city's custom geographies and the standard Census tabulation areas.
+
+<Screenshot
+  src="/screenshots/week-3/zcta-to-modzcta-crosswalk.png"
+  alt="GitHub preview of the ZCTA-to-MODZCTA.csv crosswalk file"
+  chromeTitle="GitHub"
+  chromeUrl="https://github.com/nychealth/coronavirus-data/blob/master/Geography-resources/ZCTA-to-MODZCTA.csv"
+  imgWidth={1024}
+  imgHeight={768}
+/>
+
+Download that next and import the crosswalk into a third Sheets tab. Click on the tab at the bottom and rename it to "crosswalk" for clarity.
+
+<Screenshot
+  src="/screenshots/week-3/google-sheets-crosswalk-imported.png"
+  alt="Google Sheets workbook with the ZCTA-to-MODZCTA crosswalk imported into a tab named crosswalk"
+  showChrome={false}
+  imgWidth={1024}
+  imgHeight={768}
+/>
+
+Now, after all the buildup, it's time for the big moment. Your first join.
+
+First, let's go back to your Census data tab and add a new column, which will hold the NYC code for each row. I suggest clicking on the E column's header to select it, right-clicking to see an options list, and then selecting "Insert 1 left" to create a new column at the beginning. Then rename it to MODZCTA.
+
+Next, we'll use the XLOOKUP function to match each ZCTA to the corresponding code in the A column of the crosswalk tab. After it makes a match, we'll want it to return the value in the B column, which contains the MODZCTA. If no match is made, we'll have it return "N/A", which is what we expect for all of the codes outside the five boroughs.
+
+In the patois of Google Sheets, that translates to the following formula: `=XLOOKUP(VALUE(F2), crosswalk!A:A, crosswalk!B:B, "N/A")`. Put that into the first cell of the new MODZCTA column and then copy it down for all rows. For it to work, you'll need to make sure the ZCTA values in column F are numeric using the VALUE function.
+
+<Screenshot
+  src="/screenshots/week-3/google-sheets-census-modzcta-xlookup.png"
+  alt="Google Sheets Census tab showing an XLOOKUP formula that returns N/A while matching ZCTAs to the crosswalk"
+  showChrome={false}
+  imgWidth={1183}
+  imgHeight={768}
+/>
+
+Now for the final link. Go back to your COVID data tab and add a new column for the MODZCTA in the A column. Then use a similar XLOOKUP formula to match each ZCTA to the crosswalk and return the corresponding median income in the Census tab.
+
+That will be `=XLOOKUP(VALUE(B2), census!E:E, census!C:C, "N/A")`.
+
+<Screenshot
+  src="/screenshots/week-3/google-sheets-covid-income-xlookup.png"
+  alt="Google Sheets COVID data tab with median household income values joined into a new Income column"
+  showChrome={false}
+  imgWidth={1024}
+  imgHeight={768}
+/>
+
+## Part 5: Finish the job
+
+Now look carefully at the results. You should see several warts in the data that require some kind of attention. Take a moment to identify them and think about how you might address the issues.
+
+Then compare your results to [Sharon Lerner's 2020 story](https://theintercept.com/2020/04/09/nyc-coronavirus-deaths-race-economic-divide). Look for the pattern she identified and consider whether it held up over the years that followed.
+
+We'll take a moment to do that together as a class and see what we find.
