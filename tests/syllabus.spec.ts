@@ -178,6 +178,103 @@ test('links the published classroom scripts', async ({ page }) => {
   );
 });
 
+test('lets the lecture deck widen on desktop and fit the mobile text column', async ({
+  page
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('./weeks/week-1/');
+
+  const deck = page.locator('.lesson-deck');
+  const desktopWidths = await deck.evaluate((iframe) => ({
+    deck: iframe.getBoundingClientRect().width,
+    text: iframe.closest('.week-content')?.getBoundingClientRect().width ?? 0,
+    linkRight: document.querySelector('.deck-link a')?.getBoundingClientRect().right ?? 0,
+    deckRight: iframe.getBoundingClientRect().right
+  }));
+  expect(desktopWidths.deck).toBeGreaterThan(desktopWidths.text);
+  expect(desktopWidths.linkRight).toBeCloseTo(desktopWidths.deckRight, 0);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  const mobileWidths = await deck.evaluate((iframe) => ({
+    deck: iframe.getBoundingClientRect().width,
+    text: iframe.closest('.week-content')?.getBoundingClientRect().width ?? 0,
+    linkRight: document.querySelector('.deck-link a')?.getBoundingClientRect().right ?? 0,
+    deckRight: iframe.getBoundingClientRect().right,
+    page: document.documentElement.scrollWidth
+  }));
+  expect(mobileWidths.deck).toBeCloseTo(mobileWidths.text, 0);
+  expect(mobileWidths.linkRight).toBeCloseTo(mobileWidths.deckRight, 0);
+  expect(mobileWidths.page).toBe(390);
+});
+
+test('runs the critique wheel without saving or hard-coding a roster', async ({
+  page
+}) => {
+  await page.goto('./critique-wheel/');
+
+  await expect(page).toHaveURL(/\/critique-wheel\/$/);
+  await expect(page).toHaveTitle('Wheel of Feedback | Truth-Telling 101');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Wheel of Feedback');
+  await expect(page.locator('body')).not.toContainText('CUNY');
+  const mastheadLeft = await page
+    .locator('.brand')
+    .evaluate((element) => element.getBoundingClientRect().left);
+  const panelLeft = await page
+    .locator('.setup-panel')
+    .evaluate((element) => element.getBoundingClientRect().left);
+  expect(mastheadLeft).toBeCloseTo(panelLeft, 0);
+
+  const roster = page.getByRole('textbox', { name: 'Participant names' });
+  await expect(
+    page.getByRole('button', { name: 'Randomize presentation order' })
+  ).toBeDisabled();
+  await roster.fill('Alex\nSam\nAlex');
+  await expect(page.locator('#roster-count')).toHaveText('3 names entered');
+  await page.getByRole('button', { name: 'Randomize presentation order' }).click();
+
+  await expect(page.getByRole('heading', { name: 'Who presents first?' })).toBeVisible();
+  const orderEntries = page.locator('.presentation-order');
+  await expect(orderEntries.locator('li')).toHaveCount(3);
+  for (const label of ['Alex (1)', 'Sam', 'Alex (2)']) {
+    await expect(orderEntries.getByText(label, { exact: true })).toBeVisible();
+  }
+  await page.getByRole('button', { name: 'Begin the session' }).click();
+
+  await expect(page.getByRole('heading', { level: 1 })).not.toHaveText(
+    'Wheel of Feedback'
+  );
+  await expect(page.locator('.wheel-svg')).toHaveCount(2);
+  await page.getByRole('button', { name: 'Spin both wheels' }).click();
+  await expect(
+    page.getByRole('button', { name: 'The wheels are spinning' })
+  ).toBeDisabled();
+  await expect(page.locator('.feedback-log li')).toHaveCount(1, { timeout: 5000 });
+  await expect(page.locator('.wheel-result')).not.toHaveText([
+    'Reviewer',
+    'Feedback prompt'
+  ]);
+
+  await page.getByRole('button', { name: 'Start over with this roster' }).click();
+  await expect(roster).toHaveValue('Alex\nSam\nAlex');
+  await page.reload();
+  await expect(page.getByRole('textbox', { name: 'Participant names' })).toHaveValue('');
+
+  const promptInput = page.getByRole('textbox', { name: 'Feedback prompts' });
+  await expect(promptInput).toHaveValue(
+    'Name a strength\nAsk a question\nSuggest a next step'
+  );
+  await roster.fill('Alex\nSam');
+  await promptInput.fill('Ask a question');
+  await page.getByRole('button', { name: 'Randomize presentation order' }).click();
+  await page.getByRole('button', { name: 'Begin the session' }).click();
+
+  await expect(page.locator('.wheel-svg')).toHaveCount(1);
+  await page.getByRole('button', { name: 'Spin reviewer wheel' }).click();
+  await expect(page.locator('.feedback-log li')).toContainText('Ask a question', {
+    timeout: 5000
+  });
+});
+
 test('renders the published week one page', async ({ page }) => {
   await page.goto('./weeks/week-1/');
 

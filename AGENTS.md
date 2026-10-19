@@ -18,6 +18,8 @@ the CUNY course site. Keep this guide current when the project structure changes
 
 - Use Svelte 5, TypeScript, the existing static build, and MDsveX for future
   weekly pages. Keep the site small; there is no backend.
+- The `/critique-wheel/` route is a browser-only classroom tool. Do not save or
+  hard-code participant rosters.
 - Production builds publish to the S3 `docs/truth-telling-101` prefix for
   `https://palewi.re/docs/truth-telling-101/`. Cloudflare routing is configured
   outside this repository.
