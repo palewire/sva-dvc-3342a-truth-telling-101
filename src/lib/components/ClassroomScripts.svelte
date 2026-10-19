@@ -28,19 +28,5 @@
         </div>
       {/if}
     {/if}
-
-    <div class="classroom-tool">
-      <div>
-        <p class="week-number">Classroom tool</p>
-        <h3>Critique wheel</h3>
-        <p>
-          Randomly set a presentation order, choose a reviewer, and offer a feedback
-          prompt.
-        </p>
-      </div>
-      <a class="classroom-tool-link" href={base + '/critique-wheel/'}>
-        Open the critique wheel <span aria-hidden="true">→</span>
-      </a>
-    </div>
   </div>
 </section>

@@ -158,11 +158,6 @@ test('links the first classroom script when it is published', async ({ page }) =
   );
   await expect(page.locator('.script-card h3')).toHaveText('Social science in a hurry');
   await expect(page.locator('.script-card p')).toHaveText('October 5, 2026');
-  await expect(page.locator('.classroom-tool')).toContainText('Critique wheel');
-  await expect(page.locator('.classroom-tool-link')).toHaveAttribute(
-    'href',
-    `${basePath}/critique-wheel/`
-  );
   const sections = page.locator('main > section');
   await expect(sections.nth((await sections.count()) - 1)).toHaveAttribute(
     'id',
@@ -202,8 +197,7 @@ test('lets the lecture deck widen on desktop and fit the mobile text column', as
 test('runs the critique wheel without saving or hard-coding a roster', async ({
   page
 }) => {
-  await page.goto('./');
-  await page.locator('.classroom-tool-link').click();
+  await page.goto('./critique-wheel/');
 
   await expect(page).toHaveURL(/\/critique-wheel\/$/);
   await expect(page).toHaveTitle('Critique wheel | Truth-Telling 101');
