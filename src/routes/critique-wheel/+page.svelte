@@ -385,10 +385,7 @@
       <header class="critique-header">
         <p class="critique-kicker">The order is set</p>
         <h1>Who presents first?</h1>
-        <p>
-          Here’s the randomized presentation order. You can still go back and edit the
-          roster.
-        </p>
+        <p>Here’s the randomized presentation order.</p>
       </header>
 
       <ol class="presentation-order">
