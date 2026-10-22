@@ -305,7 +305,7 @@
       <section class="setup-panel" aria-labelledby="roster-title">
         <div class="panel-heading">
           <h2 id="roster-title">Set up a session</h2>
-          <p id="roster-help">At least two, one per line. Names stay in this tab.</p>
+          <p id="roster-help">At least two, one per line.</p>
         </div>
         <label for="roster-input">Students</label>
         <textarea
