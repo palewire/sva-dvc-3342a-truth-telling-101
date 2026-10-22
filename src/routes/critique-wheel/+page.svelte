@@ -321,11 +321,7 @@
           bind:value={rawPrompts}
           oninput={handlePromptInput}
           rows="4"
-          aria-describedby="prompt-help"
         ></textarea>
-        <p class="prompt-help" id="prompt-help">
-          One per line; {MAX_PROMPT_LENGTH} characters max. One prompt repeats each turn.
-        </p>
         {#if setupError}
           <p class="setup-error" role="alert">{setupError}</p>
         {/if}
@@ -684,12 +680,6 @@
   .setup-panel textarea:focus-visible {
     outline: 3px solid var(--sva-red);
     outline-offset: 3px;
-  }
-
-  .prompt-help {
-    margin: 8px 0 0;
-    color: var(--sva-copy);
-    font-size: 14px;
   }
 
   .setup-error {

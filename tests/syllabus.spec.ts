@@ -344,7 +344,6 @@ test('limits each feedback prompt to 80 characters', async ({ page }) => {
 
   await expect(promptInput).toHaveValue(`${'A'.repeat(80)}\n${'B'.repeat(80)}`);
   await expect(page.getByRole('button', { name: 'Randomize order' })).toBeEnabled();
-  await expect(page.locator('#prompt-help')).toContainText('80 characters max');
 });
 
 test('renders the published week one page', async ({ page }) => {
