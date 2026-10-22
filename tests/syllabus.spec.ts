@@ -262,7 +262,7 @@ test('runs the critique wheel without saving or hard-coding a roster', async ({
 
   const promptInput = page.getByRole('textbox', { name: 'Prompts' });
   await expect(promptInput).toHaveValue(
-    'Name a strength\nAsk a question\nSuggest a next step'
+    'Ask a question\nGive a compliment\nSuggest an improvement'
   );
   const tenStudents = Array.from({ length: 10 }, (_, index) => `Student ${index + 1}`);
   await roster.fill(tenStudents.join('\n'));

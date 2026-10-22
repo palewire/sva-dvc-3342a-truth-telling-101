@@ -22,7 +22,11 @@
     reviewers: Participant[];
   }
 
-  const DEFAULT_PROMPTS = ['Name a strength', 'Ask a question', 'Suggest a next step'];
+  const DEFAULT_PROMPTS = [
+    'Ask a question',
+    'Give a compliment',
+    'Suggest an improvement'
+  ];
   const MAX_PROMPT_LENGTH = 80;
   const WHEEL_COLORS = [
     { fill: '#d21c00', text: '#ffffff' },
