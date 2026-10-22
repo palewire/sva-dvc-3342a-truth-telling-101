@@ -13,11 +13,22 @@
   }
 
   interface FeedbackResult {
+    presenter: Participant;
     participant: Participant;
     prompt: FeedbackPrompt;
   }
 
-  const DEFAULT_PROMPTS = ['Name a strength', 'Ask a question', 'Suggest a next step'];
+  interface PresentationTurn {
+    presenter: Participant;
+    responseCount: number;
+  }
+
+  const DEFAULT_PROMPTS = [
+    'Ask a question',
+    'Give a compliment',
+    'Suggest an improvement'
+  ];
+  const MAX_PROMPT_LENGTH = 80;
   const WHEEL_COLORS = [
     { fill: '#d21c00', text: '#ffffff' },
     { fill: '#29b5cf', text: '#292929' },
@@ -33,9 +44,10 @@
   let rawRoster = $state('');
   let rawPrompts = $state(DEFAULT_PROMPTS.join('\n'));
   let presentationOrder = $state<Participant[]>([]);
+  let presentationTurns = $state<PresentationTurn[]>([]);
   let presenterIndex = $state(0);
-  let completedParticipantIds = $state<number[]>([]);
   let roundResults = $state<FeedbackResult[]>([]);
+  let sessionResults = $state<FeedbackResult[]>([]);
   let isSpinning = $state(false);
   let wheelRotation = $state(0);
   let promptRotation = $state(0);
@@ -43,6 +55,11 @@
 
   let pendingParticipantId: number | null = null;
   let pendingPromptIndex: number | null = null;
+
+  $effect(() => {
+    const limitedPrompts = limitPromptLength(rawPrompts);
+    if (limitedPrompts !== rawPrompts) rawPrompts = limitedPrompts;
+  });
 
   const participants = $derived.by(() => {
     const names = rawRoster
@@ -69,21 +86,43 @@
       .map((prompt) => ({ short: prompt, full: prompt }))
   );
   const setupError = $derived.by(() => {
-    if (participants.length < 2) return 'Enter at least two names, one per line.';
-    if (prompts.length === 0) return 'Enter at least one feedback prompt.';
+    if (participants.length === 1) return 'Add one more student.';
+    if (prompts.length === 0) return 'Add at least one prompt.';
     return '';
   });
-  const currentPresenter = $derived(presentationOrder[presenterIndex]);
-  const audience = $derived(
-    currentPresenter
-      ? presentationOrder.filter((participant) => participant.id !== currentPresenter.id)
-      : []
-  );
-  const eligibleAudience = $derived(
-    audience.filter((participant) => !completedParticipantIds.includes(participant.id))
-  );
+  const canRandomize = $derived(participants.length >= 2 && prompts.length > 0);
+  const currentTurn = $derived(presentationTurns[presenterIndex]);
+  const currentPresenter = $derived(currentTurn?.presenter);
+  const audience = $derived.by(() => {
+    if (!currentPresenter || !currentTurn) return [];
+
+    const isExtraOddRosterSpin = currentTurn.responseCount > 1 && roundResults.length > 0;
+    if (isExtraOddRosterSpin) {
+      return presentationOrder.filter(
+        (participant) => participant.id !== currentPresenter.id
+      );
+    }
+
+    const previouslyReviewedIds = sessionResults
+      .filter((result) => result.presenter.id !== currentPresenter.id)
+      .map((result) => result.participant.id);
+    const unusedReviewers = presentationOrder.filter(
+      (participant) => !previouslyReviewedIds.includes(participant.id)
+    );
+    const remainingReviewers = unusedReviewers.filter(
+      (participant) => participant.id !== currentPresenter.id
+    );
+    const remainingPresenters = presentationOrder.slice(presenterIndex + 1);
+
+    return remainingReviewers.filter((candidate) =>
+      hasCompleteReviewerAssignment(
+        remainingPresenters,
+        unusedReviewers.filter((reviewer) => reviewer.id !== candidate.id)
+      )
+    );
+  });
   const roundComplete = $derived(
-    audience.length > 0 && completedParticipantIds.length === audience.length
+    !!currentTurn && roundResults.length >= currentTurn.responseCount
   );
 
   const canonicalRoot = import.meta.env.VITE_CANONICAL_URL?.replace(/\/+$/, '');
@@ -150,8 +189,70 @@
     pendingPromptIndex = null;
   }
 
+  function limitPromptLength(value: string): string {
+    return value
+      .split(/\r?\n/)
+      .map((prompt) => Array.from(prompt).slice(0, MAX_PROMPT_LENGTH).join(''))
+      .join('\n');
+  }
+
+  function hasCompleteReviewerAssignment(
+    presenters: Participant[],
+    reviewers: Participant[]
+  ): boolean {
+    if (presenters.length !== reviewers.length) return false;
+
+    const assignedPresenter = Array.from({ length: reviewers.length }, () => -1);
+
+    function assignReviewer(presenterIndex: number, visited: boolean[]): boolean {
+      const presenter = presenters[presenterIndex];
+      if (!presenter) return false;
+
+      for (let reviewerIndex = 0; reviewerIndex < reviewers.length; reviewerIndex += 1) {
+        const reviewer = reviewers[reviewerIndex];
+        if (!reviewer || reviewer.id === presenter.id || visited[reviewerIndex]) continue;
+        visited[reviewerIndex] = true;
+
+        const previousPresenterIndex = assignedPresenter[reviewerIndex] ?? -1;
+        if (
+          previousPresenterIndex === -1 ||
+          assignReviewer(previousPresenterIndex, visited)
+        ) {
+          assignedPresenter[reviewerIndex] = presenterIndex;
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    for (
+      let presenterIndex = 0;
+      presenterIndex < presenters.length;
+      presenterIndex += 1
+    ) {
+      if (
+        !assignReviewer(
+          presenterIndex,
+          Array.from({ length: reviewers.length }, () => false)
+        )
+      ) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  function buildPresentationTurns(order: Participant[]): PresentationTurn[] {
+    return order.map((presenter, index) => ({
+      presenter,
+      responseCount: order.length % 2 === 1 && index === order.length - 1 ? 2 : 1
+    }));
+  }
+
   function handleRandomize(): void {
-    if (setupError) return;
+    if (!canRandomize) return;
     const shuffled = [...participants];
     for (let index = shuffled.length - 1; index > 0; index -= 1) {
       const randomIndex = Math.floor(Math.random() * (index + 1));
@@ -162,21 +263,21 @@
   }
 
   function beginRound(): void {
-    completedParticipantIds = [];
     roundResults = [];
   }
 
   function handleBeginSession(): void {
     presenterIndex = 0;
+    presentationTurns = buildPresentationTurns(presentationOrder);
     beginRound();
+    sessionResults = [];
     phase = 'session';
   }
 
   function handleSpin(): void {
-    if (isSpinning || eligibleAudience.length === 0) return;
+    if (isSpinning || roundComplete || !currentTurn) return;
 
-    const participant =
-      eligibleAudience[Math.floor(Math.random() * eligibleAudience.length)];
+    const participant = audience[Math.floor(Math.random() * audience.length)];
     const promptIndex =
       prompts.length === 1 ? 0 : Math.floor(Math.random() * prompts.length);
     if (!participant) return;
@@ -198,13 +299,16 @@
         (item) => item.id === pendingParticipantId
       );
       const selectedPrompt = prompts[pendingPromptIndex ?? -1];
-      if (!selectedParticipant || !selectedPrompt) return;
+      if (!selectedParticipant || !selectedPrompt || !currentPresenter) return;
 
-      completedParticipantIds = [...completedParticipantIds, selectedParticipant.id];
-      roundResults = [
-        ...roundResults,
-        { participant: selectedParticipant, prompt: selectedPrompt }
-      ];
+      const result = {
+        presenter: currentPresenter,
+        participant: selectedParticipant,
+        prompt: selectedPrompt
+      };
+
+      roundResults = [...roundResults, result];
+      sessionResults = [...sessionResults, result];
       pendingParticipantId = null;
       pendingPromptIndex = null;
       spinTimer = undefined;
@@ -225,8 +329,10 @@
   function handleEditRoster(): void {
     clearSpinTimer();
     presentationOrder = [];
+    presentationTurns = [];
     presenterIndex = 0;
     beginRound();
+    sessionResults = [];
     phase = 'setup';
   }
 </script>
@@ -246,67 +352,40 @@
   <div class="container critique-container">
     {#if phase === 'setup'}
       <header class="critique-header">
-        <p class="critique-kicker">Truth-Telling 101</p>
         <h1>Wheel of Feedback</h1>
       </header>
 
       <section class="setup-panel" aria-labelledby="roster-title">
         <div class="panel-heading">
-          <p class="critique-kicker">Start here</p>
-          <h2 id="roster-title">Build the roster</h2>
-          <p id="roster-help">
-            Enter one participant per line. Names are only kept in this browser tab.
-          </p>
+          <h2 id="roster-title">Set up a session</h2>
+          <p id="roster-help">At least two, one per line.</p>
         </div>
-        <label for="roster-input">Participant names</label>
+        <label for="roster-input">Students</label>
         <textarea
           id="roster-input"
           bind:value={rawRoster}
           rows="9"
-          placeholder="Enter one name per line"
-          aria-describedby="roster-help roster-count"
+          aria-describedby="roster-help"
           spellcheck="false"
         ></textarea>
-        <p class="roster-count" id="roster-count" aria-live="polite">
-          {participants.length}
-          {participants.length === 1 ? 'name' : 'names'} entered
-        </p>
-        <label for="prompt-input">Feedback prompts</label>
-        <textarea
-          id="prompt-input"
-          bind:value={rawPrompts}
-          rows="4"
-          placeholder="Enter one prompt per line"
-          aria-describedby="prompt-help prompt-count"
-        ></textarea>
-        <p class="prompt-help" id="prompt-help">
-          Enter one prompt per line. A single prompt is used for every response; two or
-          more prompts create a second wheel.
-        </p>
-        <p class="roster-count" id="prompt-count" aria-live="polite">
-          {prompts.length}
-          {prompts.length === 1 ? 'prompt' : 'prompts'} entered
-        </p>
+        <label for="prompt-input">Prompts</label>
+        <textarea id="prompt-input" bind:value={rawPrompts} rows="4"></textarea>
         {#if setupError}
           <p class="setup-error" role="alert">{setupError}</p>
         {/if}
         <button
           class="tool-button tool-button-primary"
           onclick={handleRandomize}
-          disabled={!!setupError}
+          disabled={!canRandomize}
         >
-          Randomize presentation order
+          Randomize order
         </button>
-        <p class="privacy-note">Your roster is not saved or sent anywhere.</p>
       </section>
     {:else if phase === 'order'}
       <header class="critique-header">
         <p class="critique-kicker">The order is set</p>
         <h1>Who presents first?</h1>
-        <p>
-          Here’s the randomized presentation order. You can still go back and edit the
-          roster.
-        </p>
+        <p>Here’s the randomized presentation order.</p>
       </header>
 
       <ol class="presentation-order">
@@ -333,7 +412,10 @@
             Presenter {presenterIndex + 1} of {presentationOrder.length}
           </p>
           <h1>{currentPresenter.label}</h1>
-          <p>Each other participant gets one turn to respond.</p>
+          <p>
+            This presenter gets {currentTurn?.responseCount}
+            {currentTurn?.responseCount === 1 ? ' reviewer.' : ' reviewers.'}
+          </p>
         </header>
 
         <section
@@ -365,9 +447,6 @@
                       fill={color.fill}
                       stroke="#ffffff"
                       stroke-width="2"
-                      opacity={completedParticipantIds.includes(participant.id)
-                        ? 0.32
-                        : 1}
                     />
                     <text
                       x={position.x}
@@ -378,9 +457,6 @@
                       font-size={Math.max(8, Math.min(15, 160 / audience.length))}
                       font-weight="700"
                       transform="rotate({position.rotation}, {position.x}, {position.y})"
-                      opacity={completedParticipantIds.includes(participant.id)
-                        ? 0.48
-                        : 1}
                     >
                       {truncate(participant.label, labelLimit(audience.length))}
                     </text>
@@ -468,7 +544,6 @@
 
         <div class="spin-control">
           {#if roundComplete}
-            <p class="round-complete" role="status">Everyone has had a turn.</p>
             <button class="tool-button tool-button-primary" onclick={handleNextPresenter}>
               {presenterIndex + 1 < presentationOrder.length
                 ? 'Next presenter'
@@ -494,25 +569,39 @@
           {/if}
         </div>
 
-        <section class="feedback-log" aria-labelledby="feedback-log-title">
-          <h2 id="feedback-log-title">Feedback so far</h2>
-          {#if roundResults.length}
-            <ol>
-              {#each roundResults as result, index (`${result.participant.id}-${index}`)}
-                <li>
-                  <span class="log-number">{String(index + 1).padStart(2, '0')}</span>
-                  <span>{result.participant.label}</span>
-                  <span class="log-prompt">{result.prompt.full}</span>
-                </li>
+        <section class="session-order" aria-labelledby="session-order-title">
+          <h2 id="session-order-title">Session order</h2>
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Presenter</th>
+                <th scope="col">Reviewer</th>
+              </tr>
+            </thead>
+            <tbody>
+              {#each presentationOrder as participant, index (participant.id)}
+                {@const pairings = sessionResults.filter(
+                  (result) => result.presenter.id === participant.id
+                )}
+                <tr class:current-presenter={index === presenterIndex}>
+                  <td class="order-number">{String(index + 1).padStart(2, '0')}</td>
+                  <th scope="row">{participant.label}</th>
+                  <td>
+                    {#if pairings.length}
+                      <ul class="pairing-list">
+                        {#each pairings as pairing, pairingIndex (`${pairing.participant.id}-${pairingIndex}`)}
+                          <li class="pairing-reviewer">{pairing.participant.label}</li>
+                        {/each}
+                      </ul>
+                    {:else}
+                      <span class="pending-pairing">—</span>
+                    {/if}
+                  </td>
+                </tr>
               {/each}
-            </ol>
-          {:else}
-            <p>
-              Spin to choose the first reviewer{prompts.length === 1
-                ? '.'
-                : ' and prompt.'}
-            </p>
-          {/if}
+            </tbody>
+          </table>
         </section>
       {/if}
 
@@ -523,7 +612,7 @@
       <section class="complete-panel" aria-labelledby="complete-title">
         <p class="critique-kicker">Session complete</p>
         <h1 id="complete-title">Everyone has presented.</h1>
-        <p>Each presenter received feedback from the rest of the group.</p>
+        <p>Everyone presented and gave feedback.</p>
         <button class="tool-button tool-button-primary" onclick={handleEditRoster}>
           Run it again
         </button>
@@ -596,7 +685,7 @@
   }
 
   .panel-heading h2,
-  .feedback-log h2,
+  .session-order h2,
   .wheel-card h2 {
     margin-bottom: 8px;
     color: var(--sva-charcoal);
@@ -617,6 +706,10 @@
     text-transform: uppercase;
   }
 
+  .setup-panel label[for='prompt-input'] {
+    margin-top: 24px;
+  }
+
   .setup-panel textarea {
     display: block;
     width: 100%;
@@ -632,14 +725,6 @@
   .setup-panel textarea:focus-visible {
     outline: 3px solid var(--sva-red);
     outline-offset: 3px;
-  }
-
-  .roster-count,
-  .prompt-help,
-  .privacy-note {
-    margin: 8px 0 0;
-    color: var(--sva-copy);
-    font-size: 14px;
   }
 
   .setup-error {
@@ -709,8 +794,7 @@
     border-top: 1px solid var(--rule);
   }
 
-  .presentation-order li,
-  .feedback-log li {
+  .presentation-order li {
     display: flex;
     min-width: 0;
     align-items: center;
@@ -719,8 +803,7 @@
     border-bottom: 1px solid var(--rule);
   }
 
-  .order-number,
-  .log-number {
+  .order-number {
     color: var(--sva-red-on-surface);
     font-family: var(--font-ui);
     font-weight: 700;
@@ -814,13 +897,7 @@
     text-align: center;
   }
 
-  .round-complete {
-    margin: 0;
-    color: var(--sva-charcoal);
-    font-weight: 700;
-  }
-
-  .feedback-log {
+  .session-order {
     max-width: 780px;
     margin-inline: auto;
     padding: 24px;
@@ -828,25 +905,57 @@
     border-top: 4px solid var(--sva-orange);
   }
 
-  .feedback-log ol {
+  .session-order table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .session-order thead {
+    color: var(--sva-charcoal);
+    font-family: var(--font-ui);
+    font-size: 14px;
+    text-align: left;
+    text-transform: uppercase;
+  }
+
+  .session-order th,
+  .session-order td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--rule);
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  .session-order thead th {
+    display: table-cell;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .session-order tbody th {
+    font-weight: 700;
+  }
+
+  .session-order tbody tr.current-presenter {
+    background: #fff4ec;
+  }
+
+  .session-order .order-number {
+    width: 52px;
+  }
+
+  .pairing-list {
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  .feedback-log li {
-    padding-inline: 0;
+  .pairing-reviewer + .pairing-reviewer {
+    margin-top: 4px;
   }
 
-  .log-prompt {
-    margin-left: auto;
-    color: var(--sva-red-on-surface);
-    font-weight: 700;
-    text-align: right;
-  }
-
-  .feedback-log > p {
-    margin-bottom: 0;
+  .pending-pairing {
+    color: var(--sva-copy);
   }
 
   .text-button {
@@ -899,14 +1008,22 @@
       width: min(100%, 340px);
     }
 
-    .feedback-log {
+    .session-order {
       padding: 16px;
     }
 
-    .presentation-order li,
-    .feedback-log li {
+    .presentation-order li {
       gap: 10px;
       padding-inline: 10px;
+    }
+
+    .session-order th,
+    .session-order td {
+      padding-inline: 10px;
+    }
+
+    .session-order .order-number {
+      width: 36px;
     }
   }
 
@@ -930,7 +1047,7 @@
 
     .setup-panel,
     .wheel-card,
-    .feedback-log,
+    .session-order,
     .presentation-order {
       break-inside: avoid;
       background: #fff;

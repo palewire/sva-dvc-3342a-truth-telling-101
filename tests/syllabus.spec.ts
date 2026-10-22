@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 
 const basePath = process.env.BASE_PATH ?? '';
 const canonicalUrl = process.env.VITE_CANONICAL_URL;
@@ -6,6 +6,83 @@ const shareImagePath = `${basePath}/social/sva-continuing-education.avif`;
 const shareImageUrl = canonicalUrl
   ? new URL(shareImagePath, canonicalUrl).href
   : shareImagePath;
+
+async function runCritiqueSession(page: Page, students: string[]) {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('./critique-wheel/');
+
+  const roster = page.getByRole('textbox', { name: 'Students' });
+  const promptInput = page.getByRole('textbox', { name: 'Prompts' });
+  await roster.fill(students.join('\n'));
+  await promptInput.fill('Ask a question');
+  await expect(promptInput).toHaveValue('Ask a question');
+  await page.getByRole('button', { name: 'Randomize order' }).click();
+  await page.getByRole('button', { name: 'Begin the session' }).click();
+
+  const presenters: string[] = [];
+  const reviewerCounts = new Map(students.map((student) => [student, 0]));
+  let totalResponses = 0;
+
+  for (let presenterIndex = 0; presenterIndex < students.length; presenterIndex += 1) {
+    await expect(
+      page.getByText(`Presenter ${presenterIndex + 1} of ${students.length}`)
+    ).toBeVisible();
+    const currentPresenter = await page.locator('.session-heading h1').innerText();
+    presenters.push(currentPresenter);
+    const reviewerWheel = page.locator('.wheel-svg').first();
+    const currentRow = page.locator('.session-order tbody tr').nth(presenterIndex);
+    const initialWheelLabels = await reviewerWheel.locator('text').allTextContents();
+    expect(initialWheelLabels.length).toBeGreaterThan(0);
+    expect(initialWheelLabels).not.toContain(currentPresenter);
+
+    while (await page.getByRole('button', { name: 'Spin reviewer wheel' }).count()) {
+      const previousResponseCount = await currentRow.locator('.pairing-reviewer').count();
+      await page.getByRole('button', { name: 'Spin reviewer wheel' }).click();
+      await expect(currentRow.locator('.pairing-reviewer')).toHaveCount(
+        previousResponseCount + 1,
+        { timeout: 2000 }
+      );
+      const selectedReviewer = await currentRow
+        .locator('.pairing-reviewer')
+        .last()
+        .innerText();
+      const remainingReviewers = await reviewerWheel.locator('text').allTextContents();
+      expect(remainingReviewers).toContain(selectedReviewer);
+      if (
+        students.length % 2 === 1 &&
+        presenterIndex === students.length - 1 &&
+        previousResponseCount === 0
+      ) {
+        expect(remainingReviewers).toHaveLength(students.length - 1);
+      }
+    }
+
+    const reviewers = await currentRow.locator('.pairing-reviewer').allTextContents();
+    for (const reviewer of reviewers) {
+      reviewerCounts.set(reviewer, (reviewerCounts.get(reviewer) ?? 0) + 1);
+      totalResponses += 1;
+    }
+
+    const nextButton = page.getByRole('button', {
+      name: presenterIndex + 1 < students.length ? 'Next presenter' : 'Finish session'
+    });
+    await expect(nextButton).toBeVisible();
+    await nextButton.click();
+    if (presenterIndex + 1 < students.length) {
+      await expect(
+        page.getByText(`Presenter ${presenterIndex + 2} of ${students.length}`)
+      ).toBeVisible();
+      const nextWheelLabels = await reviewerWheel.locator('text').allTextContents();
+      for (const reviewer of reviewers) expect(nextWheelLabels).not.toContain(reviewer);
+    }
+  }
+
+  await expect(
+    page.getByRole('heading', { name: 'Everyone has presented.' })
+  ).toBeVisible();
+
+  return { presenters, reviewerCounts, totalResponses };
+}
 
 test('shows the SVA course facts without artwork in the hero', async ({ page }) => {
   await page.goto('./');
@@ -224,13 +301,11 @@ test('runs the critique wheel without saving or hard-coding a roster', async ({
     .evaluate((element) => element.getBoundingClientRect().left);
   expect(mastheadLeft).toBeCloseTo(panelLeft, 0);
 
-  const roster = page.getByRole('textbox', { name: 'Participant names' });
-  await expect(
-    page.getByRole('button', { name: 'Randomize presentation order' })
-  ).toBeDisabled();
+  const roster = page.getByRole('textbox', { name: 'Students' });
+  await expect(page.getByRole('button', { name: 'Randomize order' })).toBeDisabled();
   await roster.fill('Alex\nSam\nAlex');
-  await expect(page.locator('#roster-count')).toHaveText('3 names entered');
-  await page.getByRole('button', { name: 'Randomize presentation order' }).click();
+  await expect(roster).toHaveValue('Alex\nSam\nAlex');
+  await page.getByRole('button', { name: 'Randomize order' }).click();
 
   await expect(page.getByRole('heading', { name: 'Who presents first?' })).toBeVisible();
   const orderEntries = page.locator('.presentation-order');
@@ -248,31 +323,89 @@ test('runs the critique wheel without saving or hard-coding a roster', async ({
   await expect(
     page.getByRole('button', { name: 'The wheels are spinning' })
   ).toBeDisabled();
-  await expect(page.locator('.feedback-log li')).toHaveCount(1, { timeout: 5000 });
+  await expect(
+    page.locator('.session-order tr.current-presenter .pairing-reviewer')
+  ).toHaveCount(1, { timeout: 5000 });
   await expect(page.locator('.wheel-result')).not.toHaveText([
     'Reviewer',
     'Feedback prompt'
   ]);
+  await expect(page.getByRole('button', { name: 'Next presenter' })).toBeVisible();
+  await page.getByRole('button', { name: 'Next presenter' }).click();
+  await expect(page.getByText('Presenter 2 of 3')).toBeVisible();
 
   await page.getByRole('button', { name: 'Start over with this roster' }).click();
   await expect(roster).toHaveValue('Alex\nSam\nAlex');
   await page.reload();
-  await expect(page.getByRole('textbox', { name: 'Participant names' })).toHaveValue('');
+  await expect(page.getByRole('textbox', { name: 'Students' })).toHaveValue('');
 
-  const promptInput = page.getByRole('textbox', { name: 'Feedback prompts' });
+  const promptInput = page.getByRole('textbox', { name: 'Prompts' });
   await expect(promptInput).toHaveValue(
-    'Name a strength\nAsk a question\nSuggest a next step'
+    'Ask a question\nGive a compliment\nSuggest an improvement'
   );
-  await roster.fill('Alex\nSam');
+  const tenStudents = Array.from({ length: 10 }, (_, index) => `Student ${index + 1}`);
+  await roster.fill(tenStudents.join('\n'));
   await promptInput.fill('Ask a question');
-  await page.getByRole('button', { name: 'Randomize presentation order' }).click();
+  await page.getByRole('button', { name: 'Randomize order' }).click();
   await page.getByRole('button', { name: 'Begin the session' }).click();
 
   await expect(page.locator('.wheel-svg')).toHaveCount(1);
+  await expect(page.locator('.wheel-svg path')).toHaveCount(9);
   await page.getByRole('button', { name: 'Spin reviewer wheel' }).click();
-  await expect(page.locator('.feedback-log li')).toContainText('Ask a question', {
-    timeout: 5000
-  });
+  await expect(
+    page.locator('.session-order tr.current-presenter .pairing-reviewer')
+  ).toHaveCount(1, { timeout: 5000 });
+  const firstReviewer = await page.locator('.wheel-result').first().innerText();
+  expect(await page.locator('.wheel-svg text').allTextContents()).toContain(
+    firstReviewer
+  );
+  await page.getByRole('button', { name: 'Next presenter' }).click();
+  await expect(page.getByText('Presenter 2 of 10')).toBeVisible();
+  expect(await page.locator('.wheel-svg text').allTextContents()).not.toContain(
+    firstReviewer
+  );
+});
+
+test('gives every student one presentation and critique with an even roster', async ({
+  page
+}) => {
+  const students = Array.from({ length: 10 }, (_, index) => `Student ${index + 1}`);
+  const { presenters, reviewerCounts, totalResponses } = await runCritiqueSession(
+    page,
+    students
+  );
+
+  expect([...presenters].sort()).toEqual([...students].sort());
+  expect([...reviewerCounts.values()]).toEqual(students.map(() => 1));
+  expect(totalResponses).toBe(students.length);
+});
+
+test('gives everyone a presentation and critique plus one extra critique with an odd roster', async ({
+  page
+}) => {
+  const students = Array.from({ length: 5 }, (_, index) => `Student ${index + 1}`);
+  const { presenters, reviewerCounts, totalResponses } = await runCritiqueSession(
+    page,
+    students
+  );
+
+  expect([...presenters].sort()).toEqual([...students].sort());
+  expect(totalResponses).toBe(students.length + 1);
+  expect([...reviewerCounts.values()].sort((first, second) => first - second)).toEqual([
+    1, 1, 1, 1, 2
+  ]);
+});
+
+test('limits each feedback prompt to 80 characters', async ({ page }) => {
+  await page.goto('./critique-wheel/');
+
+  const roster = page.getByRole('textbox', { name: 'Students' });
+  const promptInput = page.getByRole('textbox', { name: 'Prompts' });
+  await roster.fill('Alex\nSam');
+  await promptInput.fill(`${'A'.repeat(90)}\n${'B'.repeat(81)}`);
+
+  await expect(promptInput).toHaveValue(`${'A'.repeat(80)}\n${'B'.repeat(80)}`);
+  await expect(page.getByRole('button', { name: 'Randomize order' })).toBeEnabled();
 });
 
 test('renders the published week one page', async ({ page }) => {
