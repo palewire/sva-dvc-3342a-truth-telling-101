@@ -23,6 +23,7 @@
   }
 
   const DEFAULT_PROMPTS = ['Name a strength', 'Ask a question', 'Suggest a next step'];
+  const MAX_PROMPT_LENGTH = 80;
   const WHEEL_COLORS = [
     { fill: '#d21c00', text: '#ffffff' },
     { fill: '#29b5cf', text: '#292929' },
@@ -151,6 +152,26 @@
     isSpinning = false;
     pendingParticipantId = null;
     pendingPromptIndex = null;
+  }
+
+  function limitPromptLength(value: string): string {
+    return value
+      .split(/\r?\n/)
+      .map((prompt) => Array.from(prompt).slice(0, MAX_PROMPT_LENGTH).join(''))
+      .join('\n');
+  }
+
+  function handlePromptInput(event: Event): void {
+    const input = event.currentTarget;
+    if (!(input instanceof HTMLTextAreaElement)) return;
+
+    const nextValue = limitPromptLength(input.value);
+    if (nextValue !== input.value) {
+      const cursor = limitPromptLength(input.value.slice(0, input.selectionStart)).length;
+      input.value = nextValue;
+      input.setSelectionRange(cursor, cursor);
+    }
+    rawPrompts = nextValue;
   }
 
   function buildPresentationTurns(order: Participant[]): PresentationTurn[] {
@@ -302,13 +323,14 @@
         <textarea
           id="prompt-input"
           bind:value={rawPrompts}
+          oninput={handlePromptInput}
           rows="4"
-          placeholder="Enter one prompt per line"
+          placeholder="Enter one prompt per line (80 characters max each)"
           aria-describedby="prompt-help prompt-count"
         ></textarea>
         <p class="prompt-help" id="prompt-help">
-          Enter one prompt per line. A single prompt is used for every response; two or
-          more prompts create a second wheel.
+          Enter one prompt per line, up to {MAX_PROMPT_LENGTH} characters each. A single prompt
+          is used for every response; two or more prompts create a second wheel.
         </p>
         <p class="roster-count" id="prompt-count" aria-live="polite">
           {prompts.length}

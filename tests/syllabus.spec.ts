@@ -336,6 +336,21 @@ test('gives one student a second reviewer turn when the roster is odd', async ({
   expect([...reviewerCounts.values()].filter((count) => count > 2)).toHaveLength(0);
 });
 
+test('limits each feedback prompt to 80 characters', async ({ page }) => {
+  await page.goto('./critique-wheel/');
+
+  const roster = page.getByRole('textbox', { name: 'Participant names' });
+  const promptInput = page.getByRole('textbox', { name: 'Feedback prompts' });
+  await roster.fill('Alex\nSam');
+  await promptInput.fill(`${'A'.repeat(90)}\n${'B'.repeat(81)}`);
+
+  await expect(promptInput).toHaveValue(`${'A'.repeat(80)}\n${'B'.repeat(80)}`);
+  await expect(
+    page.getByRole('button', { name: 'Randomize presentation order' })
+  ).toBeEnabled();
+  await expect(page.locator('#prompt-help')).toContainText('80 characters each');
+});
+
 test('renders the published week one page', async ({ page }) => {
   await page.goto('./weeks/week-1/');
 
