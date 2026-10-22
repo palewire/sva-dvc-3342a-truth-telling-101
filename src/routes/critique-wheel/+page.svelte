@@ -17,6 +17,11 @@
     prompt: FeedbackPrompt;
   }
 
+  interface PresentationTurn {
+    presenter: Participant;
+    reviewers: Participant[];
+  }
+
   const DEFAULT_PROMPTS = ['Name a strength', 'Ask a question', 'Suggest a next step'];
   const WHEEL_COLORS = [
     { fill: '#d21c00', text: '#ffffff' },
@@ -33,8 +38,8 @@
   let rawRoster = $state('');
   let rawPrompts = $state(DEFAULT_PROMPTS.join('\n'));
   let presentationOrder = $state<Participant[]>([]);
+  let presentationTurns = $state<PresentationTurn[]>([]);
   let presenterIndex = $state(0);
-  let completedParticipantIds = $state<number[]>([]);
   let roundResults = $state<FeedbackResult[]>([]);
   let isSpinning = $state(false);
   let wheelRotation = $state(0);
@@ -73,17 +78,15 @@
     if (prompts.length === 0) return 'Enter at least one feedback prompt.';
     return '';
   });
-  const currentPresenter = $derived(presentationOrder[presenterIndex]);
+  const currentTurn = $derived(presentationTurns[presenterIndex]);
+  const currentPresenter = $derived(currentTurn?.presenter);
   const audience = $derived(
     currentPresenter
       ? presentationOrder.filter((participant) => participant.id !== currentPresenter.id)
       : []
   );
-  const eligibleAudience = $derived(
-    audience.filter((participant) => !completedParticipantIds.includes(participant.id))
-  );
   const roundComplete = $derived(
-    audience.length > 0 && completedParticipantIds.length === audience.length
+    !!currentTurn && roundResults.length >= currentTurn.reviewers.length
   );
 
   const canonicalRoot = import.meta.env.VITE_CANONICAL_URL?.replace(/\/+$/, '');
@@ -150,6 +153,31 @@
     pendingPromptIndex = null;
   }
 
+  function buildPresentationTurns(order: Participant[]): PresentationTurn[] {
+    const reviewerOffset = 1 + Math.floor(Math.random() * (order.length - 1));
+    const turns = order.map((presenter, index) => ({
+      presenter,
+      reviewers: [order[(index + reviewerOffset) % order.length]!]
+    }));
+
+    if (order.length % 2 === 1) {
+      const finalTurn = turns[turns.length - 1];
+      const firstReviewer = finalTurn?.reviewers[0];
+      if (finalTurn && firstReviewer) {
+        const extraReviewerOptions = order.filter(
+          (participant) =>
+            participant.id !== finalTurn.presenter.id &&
+            participant.id !== firstReviewer.id
+        );
+        const extraReviewer =
+          extraReviewerOptions[Math.floor(Math.random() * extraReviewerOptions.length)];
+        if (extraReviewer) finalTurn.reviewers.push(extraReviewer);
+      }
+    }
+
+    return turns;
+  }
+
   function handleRandomize(): void {
     if (setupError) return;
     const shuffled = [...participants];
@@ -162,21 +190,20 @@
   }
 
   function beginRound(): void {
-    completedParticipantIds = [];
     roundResults = [];
   }
 
   function handleBeginSession(): void {
     presenterIndex = 0;
+    presentationTurns = buildPresentationTurns(presentationOrder);
     beginRound();
     phase = 'session';
   }
 
   function handleSpin(): void {
-    if (isSpinning || eligibleAudience.length === 0) return;
+    if (isSpinning || roundComplete || !currentTurn) return;
 
-    const participant =
-      eligibleAudience[Math.floor(Math.random() * eligibleAudience.length)];
+    const participant = currentTurn.reviewers[roundResults.length];
     const promptIndex =
       prompts.length === 1 ? 0 : Math.floor(Math.random() * prompts.length);
     if (!participant) return;
@@ -200,7 +227,6 @@
       const selectedPrompt = prompts[pendingPromptIndex ?? -1];
       if (!selectedParticipant || !selectedPrompt) return;
 
-      completedParticipantIds = [...completedParticipantIds, selectedParticipant.id];
       roundResults = [
         ...roundResults,
         { participant: selectedParticipant, prompt: selectedPrompt }
@@ -225,6 +251,7 @@
   function handleEditRoster(): void {
     clearSpinTimer();
     presentationOrder = [];
+    presentationTurns = [];
     presenterIndex = 0;
     beginRound();
     phase = 'setup';
@@ -333,7 +360,10 @@
             Presenter {presenterIndex + 1} of {presentationOrder.length}
           </p>
           <h1>{currentPresenter.label}</h1>
-          <p>Each other participant gets one turn to respond.</p>
+          <p>
+            This presenter gets {currentTurn?.reviewers.length}
+            {currentTurn?.reviewers.length === 1 ? ' reviewer.' : ' reviewers.'}
+          </p>
         </header>
 
         <section
@@ -365,7 +395,9 @@
                       fill={color.fill}
                       stroke="#ffffff"
                       stroke-width="2"
-                      opacity={completedParticipantIds.includes(participant.id)
+                      opacity={roundResults.some(
+                        (result) => result.participant.id === participant.id
+                      )
                         ? 0.32
                         : 1}
                     />
@@ -378,7 +410,9 @@
                       font-size={Math.max(8, Math.min(15, 160 / audience.length))}
                       font-weight="700"
                       transform="rotate({position.rotation}, {position.x}, {position.y})"
-                      opacity={completedParticipantIds.includes(participant.id)
+                      opacity={roundResults.some(
+                        (result) => result.participant.id === participant.id
+                      )
                         ? 0.48
                         : 1}
                     >
@@ -468,7 +502,10 @@
 
         <div class="spin-control">
           {#if roundComplete}
-            <p class="round-complete" role="status">Everyone has had a turn.</p>
+            <p class="round-complete" role="status">
+              This presenter has received {roundResults.length}
+              {roundResults.length === 1 ? ' response.' : ' responses.'}
+            </p>
             <button class="tool-button tool-button-primary" onclick={handleNextPresenter}>
               {presenterIndex + 1 < presentationOrder.length
                 ? 'Next presenter'
@@ -523,7 +560,7 @@
       <section class="complete-panel" aria-labelledby="complete-title">
         <p class="critique-kicker">Session complete</p>
         <h1 id="complete-title">Everyone has presented.</h1>
-        <p>Each presenter received feedback from the rest of the group.</p>
+        <p>Everyone presented and gave feedback.</p>
         <button class="tool-button tool-button-primary" onclick={handleEditRoster}>
           Run it again
         </button>

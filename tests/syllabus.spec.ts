@@ -253,6 +253,9 @@ test('runs the critique wheel without saving or hard-coding a roster', async ({
     'Reviewer',
     'Feedback prompt'
   ]);
+  await expect(page.getByRole('button', { name: 'Next presenter' })).toBeVisible();
+  await page.getByRole('button', { name: 'Next presenter' }).click();
+  await expect(page.getByText('Presenter 2 of 3')).toBeVisible();
 
   await page.getByRole('button', { name: 'Start over with this roster' }).click();
   await expect(roster).toHaveValue('Alex\nSam\nAlex');
@@ -263,16 +266,74 @@ test('runs the critique wheel without saving or hard-coding a roster', async ({
   await expect(promptInput).toHaveValue(
     'Name a strength\nAsk a question\nSuggest a next step'
   );
-  await roster.fill('Alex\nSam');
+  const tenStudents = Array.from({ length: 10 }, (_, index) => `Student ${index + 1}`);
+  await roster.fill(tenStudents.join('\n'));
   await promptInput.fill('Ask a question');
   await page.getByRole('button', { name: 'Randomize presentation order' }).click();
   await page.getByRole('button', { name: 'Begin the session' }).click();
 
   await expect(page.locator('.wheel-svg')).toHaveCount(1);
+  await expect(page.locator('.wheel-svg path')).toHaveCount(9);
   await page.getByRole('button', { name: 'Spin reviewer wheel' }).click();
   await expect(page.locator('.feedback-log li')).toContainText('Ask a question', {
     timeout: 5000
   });
+  await page.getByRole('button', { name: 'Next presenter' }).click();
+  await expect(page.getByText('Presenter 2 of 10')).toBeVisible();
+});
+
+test('gives one student a second reviewer turn when the roster is odd', async ({
+  page
+}) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('./critique-wheel/');
+
+  const roster = page.getByRole('textbox', { name: 'Participant names' });
+  const promptInput = page.getByRole('textbox', { name: 'Feedback prompts' });
+  const students = Array.from({ length: 5 }, (_, index) => `Student ${index + 1}`);
+  await roster.fill(students.join('\n'));
+  await promptInput.fill('Ask a question');
+  await page.getByRole('button', { name: 'Randomize presentation order' }).click();
+  await page.getByRole('button', { name: 'Begin the session' }).click();
+
+  const reviewerCounts = new Map(students.map((student) => [student, 0]));
+  let totalResponses = 0;
+
+  for (let presenterIndex = 0; presenterIndex < students.length; presenterIndex += 1) {
+    await expect(page.getByText(`Presenter ${presenterIndex + 1} of 5`)).toBeVisible();
+    while (await page.getByRole('button', { name: 'Spin reviewer wheel' }).count()) {
+      const previousResponseCount = await page.locator('.feedback-log li').count();
+      await page.getByRole('button', { name: 'Spin reviewer wheel' }).click();
+      await expect(page.locator('.feedback-log li')).toHaveCount(
+        previousResponseCount + 1,
+        { timeout: 2000 }
+      );
+    }
+
+    const reviewers = await page
+      .locator('.feedback-log li span:nth-child(2)')
+      .allTextContents();
+    for (const reviewer of reviewers) {
+      reviewerCounts.set(reviewer, (reviewerCounts.get(reviewer) ?? 0) + 1);
+      totalResponses += 1;
+    }
+
+    const nextButton = page.getByRole('button', {
+      name: presenterIndex + 1 < students.length ? 'Next presenter' : 'Finish session'
+    });
+    await expect(nextButton).toBeVisible();
+    await nextButton.click();
+  }
+
+  await expect(
+    page.getByRole('heading', { name: 'Everyone has presented.' })
+  ).toBeVisible();
+  expect(totalResponses).toBe(students.length + 1);
+  expect([...reviewerCounts.values()].filter((count) => count >= 1)).toHaveLength(
+    students.length
+  );
+  expect([...reviewerCounts.values()].filter((count) => count === 2)).toHaveLength(1);
+  expect([...reviewerCounts.values()].filter((count) => count > 2)).toHaveLength(0);
 });
 
 test('renders the published week one page', async ({ page }) => {
