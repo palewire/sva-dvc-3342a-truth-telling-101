@@ -547,10 +547,6 @@
 
         <div class="spin-control">
           {#if roundComplete}
-            <p class="round-complete" role="status">
-              This presenter has received {roundResults.length}
-              {roundResults.length === 1 ? ' response.' : ' responses.'}
-            </p>
             <button class="tool-button tool-button-primary" onclick={handleNextPresenter}>
               {presenterIndex + 1 < presentationOrder.length
                 ? 'Next presenter'
@@ -902,12 +898,6 @@
     gap: 8px;
     margin-block: 20px 32px;
     text-align: center;
-  }
-
-  .round-complete {
-    margin: 0;
-    color: var(--sva-charcoal);
-    font-weight: 700;
   }
 
   .session-order {
