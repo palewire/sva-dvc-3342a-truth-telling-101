@@ -224,13 +224,11 @@ test('runs the critique wheel without saving or hard-coding a roster', async ({
     .evaluate((element) => element.getBoundingClientRect().left);
   expect(mastheadLeft).toBeCloseTo(panelLeft, 0);
 
-  const roster = page.getByRole('textbox', { name: 'Participant names' });
-  await expect(
-    page.getByRole('button', { name: 'Randomize presentation order' })
-  ).toBeDisabled();
+  const roster = page.getByRole('textbox', { name: 'Students' });
+  await expect(page.getByRole('button', { name: 'Randomize order' })).toBeDisabled();
   await roster.fill('Alex\nSam\nAlex');
-  await expect(page.locator('#roster-count')).toHaveText('3 names entered');
-  await page.getByRole('button', { name: 'Randomize presentation order' }).click();
+  await expect(roster).toHaveValue('Alex\nSam\nAlex');
+  await page.getByRole('button', { name: 'Randomize order' }).click();
 
   await expect(page.getByRole('heading', { name: 'Who presents first?' })).toBeVisible();
   const orderEntries = page.locator('.presentation-order');
@@ -260,16 +258,16 @@ test('runs the critique wheel without saving or hard-coding a roster', async ({
   await page.getByRole('button', { name: 'Start over with this roster' }).click();
   await expect(roster).toHaveValue('Alex\nSam\nAlex');
   await page.reload();
-  await expect(page.getByRole('textbox', { name: 'Participant names' })).toHaveValue('');
+  await expect(page.getByRole('textbox', { name: 'Students' })).toHaveValue('');
 
-  const promptInput = page.getByRole('textbox', { name: 'Feedback prompts' });
+  const promptInput = page.getByRole('textbox', { name: 'Prompts' });
   await expect(promptInput).toHaveValue(
     'Name a strength\nAsk a question\nSuggest a next step'
   );
   const tenStudents = Array.from({ length: 10 }, (_, index) => `Student ${index + 1}`);
   await roster.fill(tenStudents.join('\n'));
   await promptInput.fill('Ask a question');
-  await page.getByRole('button', { name: 'Randomize presentation order' }).click();
+  await page.getByRole('button', { name: 'Randomize order' }).click();
   await page.getByRole('button', { name: 'Begin the session' }).click();
 
   await expect(page.locator('.wheel-svg')).toHaveCount(1);
@@ -288,12 +286,12 @@ test('gives one student a second reviewer turn when the roster is odd', async ({
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('./critique-wheel/');
 
-  const roster = page.getByRole('textbox', { name: 'Participant names' });
-  const promptInput = page.getByRole('textbox', { name: 'Feedback prompts' });
+  const roster = page.getByRole('textbox', { name: 'Students' });
+  const promptInput = page.getByRole('textbox', { name: 'Prompts' });
   const students = Array.from({ length: 5 }, (_, index) => `Student ${index + 1}`);
   await roster.fill(students.join('\n'));
   await promptInput.fill('Ask a question');
-  await page.getByRole('button', { name: 'Randomize presentation order' }).click();
+  await page.getByRole('button', { name: 'Randomize order' }).click();
   await page.getByRole('button', { name: 'Begin the session' }).click();
 
   const reviewerCounts = new Map(students.map((student) => [student, 0]));
@@ -339,16 +337,14 @@ test('gives one student a second reviewer turn when the roster is odd', async ({
 test('limits each feedback prompt to 80 characters', async ({ page }) => {
   await page.goto('./critique-wheel/');
 
-  const roster = page.getByRole('textbox', { name: 'Participant names' });
-  const promptInput = page.getByRole('textbox', { name: 'Feedback prompts' });
+  const roster = page.getByRole('textbox', { name: 'Students' });
+  const promptInput = page.getByRole('textbox', { name: 'Prompts' });
   await roster.fill('Alex\nSam');
   await promptInput.fill(`${'A'.repeat(90)}\n${'B'.repeat(81)}`);
 
   await expect(promptInput).toHaveValue(`${'A'.repeat(80)}\n${'B'.repeat(80)}`);
-  await expect(
-    page.getByRole('button', { name: 'Randomize presentation order' })
-  ).toBeEnabled();
-  await expect(page.locator('#prompt-help')).toContainText('80 characters each');
+  await expect(page.getByRole('button', { name: 'Randomize order' })).toBeEnabled();
+  await expect(page.locator('#prompt-help')).toContainText('80 characters max');
 });
 
 test('renders the published week one page', async ({ page }) => {

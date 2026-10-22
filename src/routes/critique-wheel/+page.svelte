@@ -75,10 +75,11 @@
       .map((prompt) => ({ short: prompt, full: prompt }))
   );
   const setupError = $derived.by(() => {
-    if (participants.length < 2) return 'Enter at least two names, one per line.';
-    if (prompts.length === 0) return 'Enter at least one feedback prompt.';
+    if (participants.length === 1) return 'Add one more student.';
+    if (prompts.length === 0) return 'Add at least one prompt.';
     return '';
   });
+  const canRandomize = $derived(participants.length >= 2 && prompts.length > 0);
   const currentTurn = $derived(presentationTurns[presenterIndex]);
   const currentPresenter = $derived(currentTurn?.presenter);
   const audience = $derived(
@@ -200,7 +201,7 @@
   }
 
   function handleRandomize(): void {
-    if (setupError) return;
+    if (!canRandomize) return;
     const shuffled = [...participants];
     for (let index = shuffled.length - 1; index > 0; index -= 1) {
       const randomIndex = Math.floor(Math.random() * (index + 1));
@@ -294,47 +295,32 @@
   <div class="container critique-container">
     {#if phase === 'setup'}
       <header class="critique-header">
-        <p class="critique-kicker">Truth-Telling 101</p>
         <h1>Wheel of Feedback</h1>
       </header>
 
       <section class="setup-panel" aria-labelledby="roster-title">
         <div class="panel-heading">
-          <p class="critique-kicker">Start here</p>
-          <h2 id="roster-title">Build the roster</h2>
-          <p id="roster-help">
-            Enter one participant per line. Names are only kept in this browser tab.
-          </p>
+          <h2 id="roster-title">Set up a session</h2>
+          <p id="roster-help">At least two, one per line. Names stay in this tab.</p>
         </div>
-        <label for="roster-input">Participant names</label>
+        <label for="roster-input">Students</label>
         <textarea
           id="roster-input"
           bind:value={rawRoster}
           rows="9"
-          placeholder="Enter one name per line"
-          aria-describedby="roster-help roster-count"
+          aria-describedby="roster-help"
           spellcheck="false"
         ></textarea>
-        <p class="roster-count" id="roster-count" aria-live="polite">
-          {participants.length}
-          {participants.length === 1 ? 'name' : 'names'} entered
-        </p>
-        <label for="prompt-input">Feedback prompts</label>
+        <label for="prompt-input">Prompts</label>
         <textarea
           id="prompt-input"
           bind:value={rawPrompts}
           oninput={handlePromptInput}
           rows="4"
-          placeholder="Enter one prompt per line (80 characters max each)"
-          aria-describedby="prompt-help prompt-count"
+          aria-describedby="prompt-help"
         ></textarea>
         <p class="prompt-help" id="prompt-help">
-          Enter one prompt per line, up to {MAX_PROMPT_LENGTH} characters each. A single prompt
-          is used for every response; two or more prompts create a second wheel.
-        </p>
-        <p class="roster-count" id="prompt-count" aria-live="polite">
-          {prompts.length}
-          {prompts.length === 1 ? 'prompt' : 'prompts'} entered
+          One per line; {MAX_PROMPT_LENGTH} characters max. One prompt repeats each turn.
         </p>
         {#if setupError}
           <p class="setup-error" role="alert">{setupError}</p>
@@ -342,11 +328,10 @@
         <button
           class="tool-button tool-button-primary"
           onclick={handleRandomize}
-          disabled={!!setupError}
+          disabled={!canRandomize}
         >
-          Randomize presentation order
+          Randomize order
         </button>
-        <p class="privacy-note">Your roster is not saved or sent anywhere.</p>
       </section>
     {:else if phase === 'order'}
       <header class="critique-header">
@@ -693,9 +678,7 @@
     outline-offset: 3px;
   }
 
-  .roster-count,
-  .prompt-help,
-  .privacy-note {
+  .prompt-help {
     margin: 8px 0 0;
     color: var(--sva-copy);
     font-size: 14px;
