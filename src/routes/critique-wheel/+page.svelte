@@ -661,6 +661,10 @@
     text-transform: uppercase;
   }
 
+  .setup-panel label[for='prompt-input'] {
+    margin-top: 24px;
+  }
+
   .setup-panel textarea {
     display: block;
     width: 100%;
