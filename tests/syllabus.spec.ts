@@ -30,28 +30,34 @@ async function runCritiqueSession(page: Page, students: string[]) {
     const currentPresenter = await page.locator('.session-heading h1').innerText();
     presenters.push(currentPresenter);
     const reviewerWheel = page.locator('.wheel-svg').first();
+    const currentRow = page.locator('.session-order tbody tr').nth(presenterIndex);
     const initialWheelLabels = await reviewerWheel.locator('text').allTextContents();
-    expect(initialWheelLabels).toHaveLength(students.length - 1);
+    expect(initialWheelLabels.length).toBeGreaterThan(0);
     expect(initialWheelLabels).not.toContain(currentPresenter);
 
     while (await page.getByRole('button', { name: 'Spin reviewer wheel' }).count()) {
-      const previousResponseCount = await page.locator('.feedback-log li').count();
+      const previousResponseCount = await currentRow.locator('.pairing-reviewer').count();
       await page.getByRole('button', { name: 'Spin reviewer wheel' }).click();
-      await expect(page.locator('.feedback-log li')).toHaveCount(
+      await expect(currentRow.locator('.pairing-reviewer')).toHaveCount(
         previousResponseCount + 1,
         { timeout: 2000 }
       );
-      const selectedReviewer = await page
-        .locator('.feedback-log li span:nth-child(2)')
+      const selectedReviewer = await currentRow
+        .locator('.pairing-reviewer')
         .last()
         .innerText();
       const remainingReviewers = await reviewerWheel.locator('text').allTextContents();
-      expect(remainingReviewers).not.toContain(selectedReviewer);
+      expect(remainingReviewers).toContain(selectedReviewer);
+      if (
+        students.length % 2 === 1 &&
+        presenterIndex === students.length - 1 &&
+        previousResponseCount === 0
+      ) {
+        expect(remainingReviewers).toHaveLength(students.length - 1);
+      }
     }
 
-    const reviewers = await page
-      .locator('.feedback-log li span:nth-child(2)')
-      .allTextContents();
+    const reviewers = await currentRow.locator('.pairing-reviewer').allTextContents();
     for (const reviewer of reviewers) {
       reviewerCounts.set(reviewer, (reviewerCounts.get(reviewer) ?? 0) + 1);
       totalResponses += 1;
@@ -62,6 +68,13 @@ async function runCritiqueSession(page: Page, students: string[]) {
     });
     await expect(nextButton).toBeVisible();
     await nextButton.click();
+    if (presenterIndex + 1 < students.length) {
+      await expect(
+        page.getByText(`Presenter ${presenterIndex + 2} of ${students.length}`)
+      ).toBeVisible();
+      const nextWheelLabels = await reviewerWheel.locator('text').allTextContents();
+      for (const reviewer of reviewers) expect(nextWheelLabels).not.toContain(reviewer);
+    }
   }
 
   await expect(
@@ -310,7 +323,9 @@ test('runs the critique wheel without saving or hard-coding a roster', async ({
   await expect(
     page.getByRole('button', { name: 'The wheels are spinning' })
   ).toBeDisabled();
-  await expect(page.locator('.feedback-log li')).toHaveCount(1, { timeout: 5000 });
+  await expect(
+    page.locator('.session-order tr.current-presenter .pairing-reviewer')
+  ).toHaveCount(1, { timeout: 5000 });
   await expect(page.locator('.wheel-result')).not.toHaveText([
     'Reviewer',
     'Feedback prompt'
@@ -337,11 +352,18 @@ test('runs the critique wheel without saving or hard-coding a roster', async ({
   await expect(page.locator('.wheel-svg')).toHaveCount(1);
   await expect(page.locator('.wheel-svg path')).toHaveCount(9);
   await page.getByRole('button', { name: 'Spin reviewer wheel' }).click();
-  await expect(page.locator('.feedback-log li')).toContainText('Ask a question', {
-    timeout: 5000
-  });
+  await expect(
+    page.locator('.session-order tr.current-presenter .pairing-reviewer')
+  ).toHaveCount(1, { timeout: 5000 });
+  const firstReviewer = await page.locator('.wheel-result').first().innerText();
+  expect(await page.locator('.wheel-svg text').allTextContents()).toContain(
+    firstReviewer
+  );
   await page.getByRole('button', { name: 'Next presenter' }).click();
   await expect(page.getByText('Presenter 2 of 10')).toBeVisible();
+  expect(await page.locator('.wheel-svg text').allTextContents()).not.toContain(
+    firstReviewer
+  );
 });
 
 test('gives every student one presentation and critique with an even roster', async ({

@@ -13,13 +13,14 @@
   }
 
   interface FeedbackResult {
+    presenter: Participant;
     participant: Participant;
     prompt: FeedbackPrompt;
   }
 
   interface PresentationTurn {
     presenter: Participant;
-    reviewers: Participant[];
+    responseCount: number;
   }
 
   const DEFAULT_PROMPTS = [
@@ -46,6 +47,7 @@
   let presentationTurns = $state<PresentationTurn[]>([]);
   let presenterIndex = $state(0);
   let roundResults = $state<FeedbackResult[]>([]);
+  let sessionResults = $state<FeedbackResult[]>([]);
   let isSpinning = $state(false);
   let wheelRotation = $state(0);
   let promptRotation = $state(0);
@@ -91,17 +93,36 @@
   const canRandomize = $derived(participants.length >= 2 && prompts.length > 0);
   const currentTurn = $derived(presentationTurns[presenterIndex]);
   const currentPresenter = $derived(currentTurn?.presenter);
-  const audience = $derived(
-    currentPresenter
-      ? presentationOrder.filter(
-          (participant) =>
-            participant.id !== currentPresenter.id &&
-            !roundResults.some((result) => result.participant.id === participant.id)
-        )
-      : []
-  );
+  const audience = $derived.by(() => {
+    if (!currentPresenter || !currentTurn) return [];
+
+    const isExtraOddRosterSpin = currentTurn.responseCount > 1 && roundResults.length > 0;
+    if (isExtraOddRosterSpin) {
+      return presentationOrder.filter(
+        (participant) => participant.id !== currentPresenter.id
+      );
+    }
+
+    const previouslyReviewedIds = sessionResults
+      .filter((result) => result.presenter.id !== currentPresenter.id)
+      .map((result) => result.participant.id);
+    const unusedReviewers = presentationOrder.filter(
+      (participant) => !previouslyReviewedIds.includes(participant.id)
+    );
+    const remainingReviewers = unusedReviewers.filter(
+      (participant) => participant.id !== currentPresenter.id
+    );
+    const remainingPresenters = presentationOrder.slice(presenterIndex + 1);
+
+    return remainingReviewers.filter((candidate) =>
+      hasCompleteReviewerAssignment(
+        remainingPresenters,
+        unusedReviewers.filter((reviewer) => reviewer.id !== candidate.id)
+      )
+    );
+  });
   const roundComplete = $derived(
-    !!currentTurn && roundResults.length >= currentTurn.reviewers.length
+    !!currentTurn && roundResults.length >= currentTurn.responseCount
   );
 
   const canonicalRoot = import.meta.env.VITE_CANONICAL_URL?.replace(/\/+$/, '');
@@ -175,31 +196,59 @@
       .join('\n');
   }
 
-  function buildPresentationTurns(order: Participant[]): PresentationTurn[] {
-    // A nonzero circular offset gives every student one critique without self-review.
-    const reviewerOffset = 1 + Math.floor(Math.random() * (order.length - 1));
-    const turns = order.map((presenter, index) => ({
-      presenter,
-      reviewers: [order[(index + reviewerOffset) % order.length]!]
-    }));
+  function hasCompleteReviewerAssignment(
+    presenters: Participant[],
+    reviewers: Participant[]
+  ): boolean {
+    if (presenters.length !== reviewers.length) return false;
 
-    // With an odd roster, add one extra reviewer so one student critiques twice.
-    if (order.length % 2 === 1) {
-      const finalTurn = turns[turns.length - 1];
-      const firstReviewer = finalTurn?.reviewers[0];
-      if (finalTurn && firstReviewer) {
-        const extraReviewerOptions = order.filter(
-          (participant) =>
-            participant.id !== finalTurn.presenter.id &&
-            participant.id !== firstReviewer.id
-        );
-        const extraReviewer =
-          extraReviewerOptions[Math.floor(Math.random() * extraReviewerOptions.length)];
-        if (extraReviewer) finalTurn.reviewers.push(extraReviewer);
+    const assignedPresenter = Array.from({ length: reviewers.length }, () => -1);
+
+    function assignReviewer(presenterIndex: number, visited: boolean[]): boolean {
+      const presenter = presenters[presenterIndex];
+      if (!presenter) return false;
+
+      for (let reviewerIndex = 0; reviewerIndex < reviewers.length; reviewerIndex += 1) {
+        const reviewer = reviewers[reviewerIndex];
+        if (!reviewer || reviewer.id === presenter.id || visited[reviewerIndex]) continue;
+        visited[reviewerIndex] = true;
+
+        const previousPresenterIndex = assignedPresenter[reviewerIndex] ?? -1;
+        if (
+          previousPresenterIndex === -1 ||
+          assignReviewer(previousPresenterIndex, visited)
+        ) {
+          assignedPresenter[reviewerIndex] = presenterIndex;
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    for (
+      let presenterIndex = 0;
+      presenterIndex < presenters.length;
+      presenterIndex += 1
+    ) {
+      if (
+        !assignReviewer(
+          presenterIndex,
+          Array.from({ length: reviewers.length }, () => false)
+        )
+      ) {
+        return false;
       }
     }
 
-    return turns;
+    return true;
+  }
+
+  function buildPresentationTurns(order: Participant[]): PresentationTurn[] {
+    return order.map((presenter, index) => ({
+      presenter,
+      responseCount: order.length % 2 === 1 && index === order.length - 1 ? 2 : 1
+    }));
   }
 
   function handleRandomize(): void {
@@ -221,13 +270,14 @@
     presenterIndex = 0;
     presentationTurns = buildPresentationTurns(presentationOrder);
     beginRound();
+    sessionResults = [];
     phase = 'session';
   }
 
   function handleSpin(): void {
     if (isSpinning || roundComplete || !currentTurn) return;
 
-    const participant = currentTurn.reviewers[roundResults.length];
+    const participant = audience[Math.floor(Math.random() * audience.length)];
     const promptIndex =
       prompts.length === 1 ? 0 : Math.floor(Math.random() * prompts.length);
     if (!participant) return;
@@ -249,12 +299,16 @@
         (item) => item.id === pendingParticipantId
       );
       const selectedPrompt = prompts[pendingPromptIndex ?? -1];
-      if (!selectedParticipant || !selectedPrompt) return;
+      if (!selectedParticipant || !selectedPrompt || !currentPresenter) return;
 
-      roundResults = [
-        ...roundResults,
-        { participant: selectedParticipant, prompt: selectedPrompt }
-      ];
+      const result = {
+        presenter: currentPresenter,
+        participant: selectedParticipant,
+        prompt: selectedPrompt
+      };
+
+      roundResults = [...roundResults, result];
+      sessionResults = [...sessionResults, result];
       pendingParticipantId = null;
       pendingPromptIndex = null;
       spinTimer = undefined;
@@ -278,6 +332,7 @@
     presentationTurns = [];
     presenterIndex = 0;
     beginRound();
+    sessionResults = [];
     phase = 'setup';
   }
 </script>
@@ -361,8 +416,8 @@
           </p>
           <h1>{currentPresenter.label}</h1>
           <p>
-            This presenter gets {currentTurn?.reviewers.length}
-            {currentTurn?.reviewers.length === 1 ? ' reviewer.' : ' reviewers.'}
+            This presenter gets {currentTurn?.responseCount}
+            {currentTurn?.responseCount === 1 ? ' reviewer.' : ' reviewers.'}
           </p>
         </header>
 
@@ -521,25 +576,39 @@
           {/if}
         </div>
 
-        <section class="feedback-log" aria-labelledby="feedback-log-title">
-          <h2 id="feedback-log-title">Feedback so far</h2>
-          {#if roundResults.length}
-            <ol>
-              {#each roundResults as result, index (`${result.participant.id}-${index}`)}
-                <li>
-                  <span class="log-number">{String(index + 1).padStart(2, '0')}</span>
-                  <span>{result.participant.label}</span>
-                  <span class="log-prompt">{result.prompt.full}</span>
-                </li>
+        <section class="session-order" aria-labelledby="session-order-title">
+          <h2 id="session-order-title">Session order</h2>
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Presenter</th>
+                <th scope="col">Reviewer</th>
+              </tr>
+            </thead>
+            <tbody>
+              {#each presentationOrder as participant, index (participant.id)}
+                {@const pairings = sessionResults.filter(
+                  (result) => result.presenter.id === participant.id
+                )}
+                <tr class:current-presenter={index === presenterIndex}>
+                  <td class="order-number">{String(index + 1).padStart(2, '0')}</td>
+                  <th scope="row">{participant.label}</th>
+                  <td>
+                    {#if pairings.length}
+                      <ul class="pairing-list">
+                        {#each pairings as pairing, pairingIndex (`${pairing.participant.id}-${pairingIndex}`)}
+                          <li class="pairing-reviewer">{pairing.participant.label}</li>
+                        {/each}
+                      </ul>
+                    {:else}
+                      <span class="pending-pairing">—</span>
+                    {/if}
+                  </td>
+                </tr>
               {/each}
-            </ol>
-          {:else}
-            <p>
-              Spin to choose the first reviewer{prompts.length === 1
-                ? '.'
-                : ' and prompt.'}
-            </p>
-          {/if}
+            </tbody>
+          </table>
         </section>
       {/if}
 
@@ -623,7 +692,7 @@
   }
 
   .panel-heading h2,
-  .feedback-log h2,
+  .session-order h2,
   .wheel-card h2 {
     margin-bottom: 8px;
     color: var(--sva-charcoal);
@@ -732,8 +801,7 @@
     border-top: 1px solid var(--rule);
   }
 
-  .presentation-order li,
-  .feedback-log li {
+  .presentation-order li {
     display: flex;
     min-width: 0;
     align-items: center;
@@ -742,8 +810,7 @@
     border-bottom: 1px solid var(--rule);
   }
 
-  .order-number,
-  .log-number {
+  .order-number {
     color: var(--sva-red-on-surface);
     font-family: var(--font-ui);
     font-weight: 700;
@@ -843,7 +910,7 @@
     font-weight: 700;
   }
 
-  .feedback-log {
+  .session-order {
     max-width: 780px;
     margin-inline: auto;
     padding: 24px;
@@ -851,25 +918,57 @@
     border-top: 4px solid var(--sva-orange);
   }
 
-  .feedback-log ol {
+  .session-order table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .session-order thead {
+    color: var(--sva-charcoal);
+    font-family: var(--font-ui);
+    font-size: 14px;
+    text-align: left;
+    text-transform: uppercase;
+  }
+
+  .session-order th,
+  .session-order td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--rule);
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  .session-order thead th {
+    display: table-cell;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .session-order tbody th {
+    font-weight: 700;
+  }
+
+  .session-order tbody tr.current-presenter {
+    background: #fff4ec;
+  }
+
+  .session-order .order-number {
+    width: 52px;
+  }
+
+  .pairing-list {
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  .feedback-log li {
-    padding-inline: 0;
+  .pairing-reviewer + .pairing-reviewer {
+    margin-top: 4px;
   }
 
-  .log-prompt {
-    margin-left: auto;
-    color: var(--sva-red-on-surface);
-    font-weight: 700;
-    text-align: right;
-  }
-
-  .feedback-log > p {
-    margin-bottom: 0;
+  .pending-pairing {
+    color: var(--sva-copy);
   }
 
   .text-button {
@@ -922,14 +1021,22 @@
       width: min(100%, 340px);
     }
 
-    .feedback-log {
+    .session-order {
       padding: 16px;
     }
 
-    .presentation-order li,
-    .feedback-log li {
+    .presentation-order li {
       gap: 10px;
       padding-inline: 10px;
+    }
+
+    .session-order th,
+    .session-order td {
+      padding-inline: 10px;
+    }
+
+    .session-order .order-number {
+      width: 36px;
     }
   }
 
@@ -953,7 +1060,7 @@
 
     .setup-panel,
     .wheel-card,
-    .feedback-log,
+    .session-order,
     .presentation-order {
       break-inside: avoid;
       background: #fff;
