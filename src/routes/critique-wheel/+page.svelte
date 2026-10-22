@@ -54,6 +54,11 @@
   let pendingParticipantId: number | null = null;
   let pendingPromptIndex: number | null = null;
 
+  $effect(() => {
+    const limitedPrompts = limitPromptLength(rawPrompts);
+    if (limitedPrompts !== rawPrompts) rawPrompts = limitedPrompts;
+  });
+
   const participants = $derived.by(() => {
     const names = rawRoster
       .split(/\r?\n/)
@@ -88,7 +93,11 @@
   const currentPresenter = $derived(currentTurn?.presenter);
   const audience = $derived(
     currentPresenter
-      ? presentationOrder.filter((participant) => participant.id !== currentPresenter.id)
+      ? presentationOrder.filter(
+          (participant) =>
+            participant.id !== currentPresenter.id &&
+            !roundResults.some((result) => result.participant.id === participant.id)
+        )
       : []
   );
   const roundComplete = $derived(
@@ -166,26 +175,15 @@
       .join('\n');
   }
 
-  function handlePromptInput(event: Event): void {
-    const input = event.currentTarget;
-    if (!(input instanceof HTMLTextAreaElement)) return;
-
-    const nextValue = limitPromptLength(input.value);
-    if (nextValue !== input.value) {
-      const cursor = limitPromptLength(input.value.slice(0, input.selectionStart)).length;
-      input.value = nextValue;
-      input.setSelectionRange(cursor, cursor);
-    }
-    rawPrompts = nextValue;
-  }
-
   function buildPresentationTurns(order: Participant[]): PresentationTurn[] {
+    // A nonzero circular offset gives every student one critique without self-review.
     const reviewerOffset = 1 + Math.floor(Math.random() * (order.length - 1));
     const turns = order.map((presenter, index) => ({
       presenter,
       reviewers: [order[(index + reviewerOffset) % order.length]!]
     }));
 
+    // With an odd roster, add one extra reviewer so one student critiques twice.
     if (order.length % 2 === 1) {
       const finalTurn = turns[turns.length - 1];
       const firstReviewer = finalTurn?.reviewers[0];
@@ -316,12 +314,7 @@
           spellcheck="false"
         ></textarea>
         <label for="prompt-input">Prompts</label>
-        <textarea
-          id="prompt-input"
-          bind:value={rawPrompts}
-          oninput={handlePromptInput}
-          rows="4"
-        ></textarea>
+        <textarea id="prompt-input" bind:value={rawPrompts} rows="4"></textarea>
         {#if setupError}
           <p class="setup-error" role="alert">{setupError}</p>
         {/if}
@@ -402,11 +395,6 @@
                       fill={color.fill}
                       stroke="#ffffff"
                       stroke-width="2"
-                      opacity={roundResults.some(
-                        (result) => result.participant.id === participant.id
-                      )
-                        ? 0.32
-                        : 1}
                     />
                     <text
                       x={position.x}
@@ -417,11 +405,6 @@
                       font-size={Math.max(8, Math.min(15, 160 / audience.length))}
                       font-weight="700"
                       transform="rotate({position.rotation}, {position.x}, {position.y})"
-                      opacity={roundResults.some(
-                        (result) => result.participant.id === participant.id
-                      )
-                        ? 0.48
-                        : 1}
                     >
                       {truncate(participant.label, labelLimit(audience.length))}
                     </text>

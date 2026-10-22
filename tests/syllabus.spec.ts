@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 
 const basePath = process.env.BASE_PATH ?? '';
 const canonicalUrl = process.env.VITE_CANONICAL_URL;
@@ -6,6 +6,70 @@ const shareImagePath = `${basePath}/social/sva-continuing-education.avif`;
 const shareImageUrl = canonicalUrl
   ? new URL(shareImagePath, canonicalUrl).href
   : shareImagePath;
+
+async function runCritiqueSession(page: Page, students: string[]) {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('./critique-wheel/');
+
+  const roster = page.getByRole('textbox', { name: 'Students' });
+  const promptInput = page.getByRole('textbox', { name: 'Prompts' });
+  await roster.fill(students.join('\n'));
+  await promptInput.fill('Ask a question');
+  await expect(promptInput).toHaveValue('Ask a question');
+  await page.getByRole('button', { name: 'Randomize order' }).click();
+  await page.getByRole('button', { name: 'Begin the session' }).click();
+
+  const presenters: string[] = [];
+  const reviewerCounts = new Map(students.map((student) => [student, 0]));
+  let totalResponses = 0;
+
+  for (let presenterIndex = 0; presenterIndex < students.length; presenterIndex += 1) {
+    await expect(
+      page.getByText(`Presenter ${presenterIndex + 1} of ${students.length}`)
+    ).toBeVisible();
+    const currentPresenter = await page.locator('.session-heading h1').innerText();
+    presenters.push(currentPresenter);
+    const reviewerWheel = page.locator('.wheel-svg').first();
+    const initialWheelLabels = await reviewerWheel.locator('text').allTextContents();
+    expect(initialWheelLabels).toHaveLength(students.length - 1);
+    expect(initialWheelLabels).not.toContain(currentPresenter);
+
+    while (await page.getByRole('button', { name: 'Spin reviewer wheel' }).count()) {
+      const previousResponseCount = await page.locator('.feedback-log li').count();
+      await page.getByRole('button', { name: 'Spin reviewer wheel' }).click();
+      await expect(page.locator('.feedback-log li')).toHaveCount(
+        previousResponseCount + 1,
+        { timeout: 2000 }
+      );
+      const selectedReviewer = await page
+        .locator('.feedback-log li span:nth-child(2)')
+        .last()
+        .innerText();
+      const remainingReviewers = await reviewerWheel.locator('text').allTextContents();
+      expect(remainingReviewers).not.toContain(selectedReviewer);
+    }
+
+    const reviewers = await page
+      .locator('.feedback-log li span:nth-child(2)')
+      .allTextContents();
+    for (const reviewer of reviewers) {
+      reviewerCounts.set(reviewer, (reviewerCounts.get(reviewer) ?? 0) + 1);
+      totalResponses += 1;
+    }
+
+    const nextButton = page.getByRole('button', {
+      name: presenterIndex + 1 < students.length ? 'Next presenter' : 'Finish session'
+    });
+    await expect(nextButton).toBeVisible();
+    await nextButton.click();
+  }
+
+  await expect(
+    page.getByRole('heading', { name: 'Everyone has presented.' })
+  ).toBeVisible();
+
+  return { presenters, reviewerCounts, totalResponses };
+}
 
 test('shows the SVA course facts without artwork in the hero', async ({ page }) => {
   await page.goto('./');
@@ -280,58 +344,34 @@ test('runs the critique wheel without saving or hard-coding a roster', async ({
   await expect(page.getByText('Presenter 2 of 10')).toBeVisible();
 });
 
-test('gives one student a second reviewer turn when the roster is odd', async ({
+test('gives every student one presentation and critique with an even roster', async ({
   page
 }) => {
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('./critique-wheel/');
-
-  const roster = page.getByRole('textbox', { name: 'Students' });
-  const promptInput = page.getByRole('textbox', { name: 'Prompts' });
-  const students = Array.from({ length: 5 }, (_, index) => `Student ${index + 1}`);
-  await roster.fill(students.join('\n'));
-  await promptInput.fill('Ask a question');
-  await page.getByRole('button', { name: 'Randomize order' }).click();
-  await page.getByRole('button', { name: 'Begin the session' }).click();
-
-  const reviewerCounts = new Map(students.map((student) => [student, 0]));
-  let totalResponses = 0;
-
-  for (let presenterIndex = 0; presenterIndex < students.length; presenterIndex += 1) {
-    await expect(page.getByText(`Presenter ${presenterIndex + 1} of 5`)).toBeVisible();
-    while (await page.getByRole('button', { name: 'Spin reviewer wheel' }).count()) {
-      const previousResponseCount = await page.locator('.feedback-log li').count();
-      await page.getByRole('button', { name: 'Spin reviewer wheel' }).click();
-      await expect(page.locator('.feedback-log li')).toHaveCount(
-        previousResponseCount + 1,
-        { timeout: 2000 }
-      );
-    }
-
-    const reviewers = await page
-      .locator('.feedback-log li span:nth-child(2)')
-      .allTextContents();
-    for (const reviewer of reviewers) {
-      reviewerCounts.set(reviewer, (reviewerCounts.get(reviewer) ?? 0) + 1);
-      totalResponses += 1;
-    }
-
-    const nextButton = page.getByRole('button', {
-      name: presenterIndex + 1 < students.length ? 'Next presenter' : 'Finish session'
-    });
-    await expect(nextButton).toBeVisible();
-    await nextButton.click();
-  }
-
-  await expect(
-    page.getByRole('heading', { name: 'Everyone has presented.' })
-  ).toBeVisible();
-  expect(totalResponses).toBe(students.length + 1);
-  expect([...reviewerCounts.values()].filter((count) => count >= 1)).toHaveLength(
-    students.length
+  const students = Array.from({ length: 10 }, (_, index) => `Student ${index + 1}`);
+  const { presenters, reviewerCounts, totalResponses } = await runCritiqueSession(
+    page,
+    students
   );
-  expect([...reviewerCounts.values()].filter((count) => count === 2)).toHaveLength(1);
-  expect([...reviewerCounts.values()].filter((count) => count > 2)).toHaveLength(0);
+
+  expect([...presenters].sort()).toEqual([...students].sort());
+  expect([...reviewerCounts.values()]).toEqual(students.map(() => 1));
+  expect(totalResponses).toBe(students.length);
+});
+
+test('gives everyone a presentation and critique plus one extra critique with an odd roster', async ({
+  page
+}) => {
+  const students = Array.from({ length: 5 }, (_, index) => `Student ${index + 1}`);
+  const { presenters, reviewerCounts, totalResponses } = await runCritiqueSession(
+    page,
+    students
+  );
+
+  expect([...presenters].sort()).toEqual([...students].sort());
+  expect(totalResponses).toBe(students.length + 1);
+  expect([...reviewerCounts.values()].sort((first, second) => first - second)).toEqual([
+    1, 1, 1, 1, 2
+  ]);
 });
 
 test('limits each feedback prompt to 80 characters', async ({ page }) => {
