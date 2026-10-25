@@ -360,7 +360,7 @@ test('runs the critique wheel without saving or hard-coding a roster', async ({
   await expect(promptInput).toHaveValue(
     'Ask a question\nGive a compliment\nSuggest an improvement'
   );
-  const tenStudents = Array.from({ length: 10 }, (_, index) => `Student ${index + 1}`);
+  const tenStudents = Array.from({ length: 10 }, (_, index) => `Name ${index + 1}`);
   await roster.fill(tenStudents.join('\n'));
   await promptInput.fill('Ask a question');
   await page.getByRole('button', { name: 'Randomize order' }).click();
@@ -386,7 +386,7 @@ test('runs the critique wheel without saving or hard-coding a roster', async ({
 test('gives every student one presentation and critique with an even roster', async ({
   page
 }) => {
-  const students = Array.from({ length: 10 }, (_, index) => `Student ${index + 1}`);
+  const students = Array.from({ length: 10 }, (_, index) => `Name ${index + 1}`);
   const { presenters, reviewerCounts, totalResponses } = await runCritiqueSession(
     page,
     students
@@ -400,7 +400,7 @@ test('gives every student one presentation and critique with an even roster', as
 test('gives everyone a presentation and critique plus one extra critique with an odd roster', async ({
   page
 }) => {
-  const students = Array.from({ length: 5 }, (_, index) => `Student ${index + 1}`);
+  const students = Array.from({ length: 5 }, (_, index) => `Name ${index + 1}`);
   const { presenters, reviewerCounts, totalResponses } = await runCritiqueSession(
     page,
     students
