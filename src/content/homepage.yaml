@@ -74,7 +74,8 @@ schedule:
     - number: 4
       date: '2026-10-26'
       displayDate: 'Monday, Oct. 26, 2026'
-      topic: 'To be announced'
+      topic: 'Peeling the onion'
+      href: /weeks/week-4/
     - number: 5
       date: '2026-11-02'
       displayDate: 'Monday, Nov. 2, 2026'
