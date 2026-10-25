@@ -15,7 +15,7 @@
     "lighthouse": "lhci autorun"
   },
   "dependencies": {
-    "@lucide/svelte": "^1.49.0",
+    "@lucide/svelte": "^1.55.0",
     "js-yaml": "^4.1.1",
     "rehype-slug": "^6.0.0",
     "shiki": "^4.5.0"
