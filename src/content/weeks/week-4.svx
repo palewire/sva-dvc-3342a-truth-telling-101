@@ -1,0 +1,55 @@
+---
+title: 'Peeling the onion'
+summary: 'How reporters dig out the truth by working from the outside in'
+week: 4
+---
+
+<script>
+  import { base } from '$app/paths';
+
+  const critiqueWheelHref = base + '/critique-wheel/';
+</script>
+
+<iframe
+  class="lesson-deck"
+  src="https://palewi.re/docs/sva-dvc-3342a-slide-deck/lectures/peeling-the-onion/?controls=1#/1"
+  title="Peeling the onion lecture deck"
+  width="100%"
+  height="600"
+  loading="lazy"
+  allowfullscreen
+></iframe>
+
+<p class="deck-link">
+  <a href="https://palewi.re/docs/sva-dvc-3342a-slide-deck/lectures/peeling-the-onion/" target="_blank" rel="noopener noreferrer">Open deck in a new tab</a>
+</p>
+
+## Class outline
+
+1. **Homework presentations guided by the <a href={critiqueWheelHref}>Wheel of Feedback</a>**
+2. **Guest appearance by [Haidee Chu](https://www.thecityreporter.nyc/author/haidee/)**
+3. **Break**
+4. **Presentation on Peeling the onion**
+5. **New homework assignments for next week**
+
+## Homework
+
+### Task 1: Survey secondary sources
+
+Revisit one of the topics you researched in previous weeks. Use your internet search skills to identify news stories that cover your areas of interest. Identify a gap in the journalism landscape that you could potentially fill with an analysis of your own.
+
+### Task 2: Expand your primary documents
+
+Identify at least one companion dataset or document that could help supplement or cross-check the dataset you analyzed in previous weeks.
+
+### Task 3: Map out human sources
+
+Make a short list of people you could contact to learn more about your primary dataset. They could be the people who created the dataset, experts on the dataset or people who appear in the dataset.
+
+### Task 4: Make contact
+
+If you're comfortable doing so, conduct an interview with at least one of your human sources to learn more about the dataset. This is an optional assignment. Do not feel obligated to do it unless you feel comfortable.
+
+### Task 5: Prepare to present
+
+Next week, everyone will be asked to verbally share what they learned by peeling back the onion and working from the outside in.
