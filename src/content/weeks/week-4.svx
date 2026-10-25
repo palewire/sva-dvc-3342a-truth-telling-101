@@ -1,6 +1,6 @@
 ---
 title: 'Peeling the onion'
-summary: 'How reporters verify their findings by working from the outside in'
+summary: 'How reporters dig out the truth by working from the outside in'
 week: 4
 ---
 
@@ -12,7 +12,7 @@ week: 4
 
 <iframe
   class="lesson-deck"
-  src="https://palewi.re/docs/sva-dvc-3342a-slide-deck/lectures/peeling-the-onion/?controls=1"
+  src="https://palewi.re/docs/sva-dvc-3342a-slide-deck/lectures/peeling-the-onion/?controls=1#/1"
   title="Peeling the onion lecture deck"
   width="100%"
   height="600"
@@ -29,34 +29,27 @@ week: 4
 1. **Homework presentations guided by the <a href={critiqueWheelHref}>Wheel of Feedback</a>**
 2. **Guest appearance by [Haidee Chu](https://www.thecityreporter.nyc/author/haidee/)**
 3. **Break**
-4. **Presentation on Peeling the Onion**
+4. **Presentation on Peeling the onion**
 5. **New homework assignments for next week**
 
 ## Homework
 
-Work through the layers for your own story. The goal is to test your finding and develop a plan for the reporting you still need to do.
+### Task 1: Survey secondary sources
 
-### Task 1: Work from the outside in
+Revisit one of the topics you researched in previous weeks. Use your internet search skills to identify news stories that cover your areas of interest. Identify a gap in the journalism landscape that you could potentially fill with an analysis of your own.
 
-Search for what's already been published about your finding or dataset. Retrace your analysis in the original data, then look for a second, independent dataset that could help you check your numbers.
+### Task 2: Expand your primary documents
 
-Keep notes on what you checked, what you learned and what you still cannot verify.
+Identify at least one companion dataset or document that could help supplement or cross-check the dataset you analyzed in previous weeks.
 
-### Task 2: Identify your human sources
+### Task 3: Map out human sources
 
-At a minimum, identify at least one person to contact in each of these groups:
+Make a short list of people you could contact to learn more about your primary dataset. They could be the people who created the dataset, experts on the dataset or people who appear in the dataset.
 
-- **Inside the institution:** Someone involved in creating or maintaining your dataset who can check whether you've understood it correctly.
-- **Outside experts:** Someone with topic knowledge who is independent of the institution that produced your data.
-- **People in your findings:** Someone whose experience can help you test what the data says about real people and places.
-- **The subject of your story:** Someone who can respond on behalf of the person or institution whose actions your findings examine.
+### Task 4: Make contact
 
-For each source, record their name and role, how you could contact them and the questions you want to ask.
+If you're comfortable doing so, conduct an interview with at least one of your human sources to learn more about the dataset. This is an optional assignment. Do not feel obligated to do it unless you feel comfortable.
 
-### Task 3: Prepare to present
+### Task 5: Prepare to present
 
-Be ready to share your finding, your source list and what you still need to verify with the class next week.
-
-### Bonus points: Make contact
-
-Actually contact the human sources you've identified. Keep track of whom you contacted, any responses and how those conversations changed your understanding of the story.
+Next week, everyone will be asked to verbally share what they learned by peeling back the onion and working from the outside in.

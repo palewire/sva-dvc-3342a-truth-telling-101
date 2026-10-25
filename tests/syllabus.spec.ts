@@ -257,7 +257,7 @@ test('links the published classroom scripts', async ({ page }) => {
 
 for (const { week, slug, embedSuffix } of [
   { week: 1, slug: 'social-science-in-a-hurry', embedSuffix: '?controls=1#/1' },
-  { week: 4, slug: 'peeling-the-onion', embedSuffix: '?controls=1' }
+  { week: 4, slug: 'peeling-the-onion', embedSuffix: '?controls=1#/1' }
 ]) {
   test(`Week ${week} lecture deck widens on desktop and fits the mobile text column`, async ({
     page
