@@ -10,6 +10,20 @@ week: 4
   const critiqueWheelHref = base + '/critique-wheel/';
 </script>
 
+<iframe
+  class="lesson-deck"
+  src="https://palewi.re/docs/sva-dvc-3342a-slide-deck/lectures/peeling-the-onion/?controls=1"
+  title="Peeling the onion lecture deck"
+  width="100%"
+  height="600"
+  loading="lazy"
+  allowfullscreen
+></iframe>
+
+<p class="deck-link">
+  <a href="https://palewi.re/docs/sva-dvc-3342a-slide-deck/lectures/peeling-the-onion/" target="_blank" rel="noopener noreferrer">Open deck in a new tab</a>
+</p>
+
 ## Class outline
 
 1. **Homework presentations guided by the <a href={critiqueWheelHref}>Wheel of Feedback</a>**
@@ -17,13 +31,6 @@ week: 4
 3. **Break**
 4. **Presentation on Peeling the Onion**
 5. **New homework assignments for next week**
-
-## Lecture deck
-
-The lecture deck will be added here.
-
-<!-- Embed the finished deck from the separate presentation repository here,
-     using Week 1's lesson-deck iframe and deck-link styles. -->
 
 ## The outside-in method
 

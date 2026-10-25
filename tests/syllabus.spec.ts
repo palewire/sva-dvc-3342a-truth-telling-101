@@ -255,34 +255,51 @@ test('links the published classroom scripts', async ({ page }) => {
   );
 });
 
-test('lets the lecture deck widen on desktop and fit the mobile text column', async ({
-  page
-}) => {
-  await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto('./weeks/week-1/');
+for (const { week, slug, embedSuffix } of [
+  { week: 1, slug: 'social-science-in-a-hurry', embedSuffix: '?controls=1#/1' },
+  { week: 4, slug: 'peeling-the-onion', embedSuffix: '?controls=1' }
+]) {
+  test(`Week ${week} lecture deck widens on desktop and fits the mobile text column`, async ({
+    page
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(`./weeks/week-${week}/`);
 
-  const deck = page.locator('.lesson-deck');
-  const desktopWidths = await deck.evaluate((iframe) => ({
-    deck: iframe.getBoundingClientRect().width,
-    text: iframe.closest('.week-content')?.getBoundingClientRect().width ?? 0,
-    linkRight: document.querySelector('.deck-link a')?.getBoundingClientRect().right ?? 0,
-    deckRight: iframe.getBoundingClientRect().right
-  }));
-  expect(desktopWidths.deck).toBeGreaterThan(desktopWidths.text);
-  expect(desktopWidths.linkRight).toBeCloseTo(desktopWidths.deckRight, 0);
+    const deck = page.locator('.lesson-deck');
+    const deckUrl = `https://palewi.re/docs/sva-dvc-3342a-slide-deck/lectures/${slug}/`;
+    await expect(deck).toHaveAttribute('src', `${deckUrl}${embedSuffix}`);
+    await expect(page.locator('.deck-link a')).toHaveAttribute('href', deckUrl);
+    const placement = await deck.evaluate((iframe) => ({
+      deckTop: iframe.getBoundingClientRect().top,
+      outlineTop:
+        iframe.closest('.week-content')?.querySelector('h2')?.getBoundingClientRect()
+          .top ?? 0
+    }));
+    expect(placement.deckTop).toBeLessThan(placement.outlineTop);
+    const desktopWidths = await deck.evaluate((iframe) => ({
+      deck: iframe.getBoundingClientRect().width,
+      text: iframe.closest('.week-content')?.getBoundingClientRect().width ?? 0,
+      linkRight:
+        document.querySelector('.deck-link a')?.getBoundingClientRect().right ?? 0,
+      deckRight: iframe.getBoundingClientRect().right
+    }));
+    expect(desktopWidths.deck).toBeGreaterThan(desktopWidths.text);
+    expect(desktopWidths.linkRight).toBeCloseTo(desktopWidths.deckRight, 0);
 
-  await page.setViewportSize({ width: 390, height: 844 });
-  const mobileWidths = await deck.evaluate((iframe) => ({
-    deck: iframe.getBoundingClientRect().width,
-    text: iframe.closest('.week-content')?.getBoundingClientRect().width ?? 0,
-    linkRight: document.querySelector('.deck-link a')?.getBoundingClientRect().right ?? 0,
-    deckRight: iframe.getBoundingClientRect().right,
-    page: document.documentElement.scrollWidth
-  }));
-  expect(mobileWidths.deck).toBeCloseTo(mobileWidths.text, 0);
-  expect(mobileWidths.linkRight).toBeCloseTo(mobileWidths.deckRight, 0);
-  expect(mobileWidths.page).toBe(390);
-});
+    await page.setViewportSize({ width: 390, height: 844 });
+    const mobileWidths = await deck.evaluate((iframe) => ({
+      deck: iframe.getBoundingClientRect().width,
+      text: iframe.closest('.week-content')?.getBoundingClientRect().width ?? 0,
+      linkRight:
+        document.querySelector('.deck-link a')?.getBoundingClientRect().right ?? 0,
+      deckRight: iframe.getBoundingClientRect().right,
+      page: document.documentElement.scrollWidth
+    }));
+    expect(mobileWidths.deck).toBeCloseTo(mobileWidths.text, 0);
+    expect(mobileWidths.linkRight).toBeCloseTo(mobileWidths.deckRight, 0);
+    expect(mobileWidths.page).toBe(390);
+  });
+}
 
 test('runs the critique wheel without saving or hard-coding a roster', async ({
   page
