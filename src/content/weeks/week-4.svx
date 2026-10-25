@@ -32,39 +32,6 @@ week: 4
 4. **Presentation on Peeling the Onion**
 5. **New homework assignments for next week**
 
-## The outside-in method
-
-Finding a pattern in a spreadsheet is a beginning. Before publishing, reporters need to test their findings against documents, independent sources and the people at the center of the story.
-
-The model comes from *The Investigative Reporter's Handbook: A Guide to Documents, Databases, and Techniques*, from Investigative Reporters and Editors, edited across editions by Brant Houston, with Len Bruzzese and Steve Weinberg on earlier editions. Its first chapter describes "working from the outside in":
-
-> Rendered graphically, the approach would resemble concentric circles, with the outermost circle labeled "secondary sources," the middle circle called "primary documents," and the inner circle, "human sources." The main subject of the investigation is at the center.
-
-For data journalism, we also need to verify our own analysis. Use the rings below to work from what's already been published toward the people at the center of your findings.
-
-### Ring 1 — Secondary sources
-
-What's already been published:
-
-- Search the web for anyone else who has reported the same findings, or used this dataset before.
-
-### Ring 2 — Primary documents
-
-The raw records:
-
-- Reproduce your own path to your findings, step by step, in your original data.
-- Find a second, independent dataset that measures the same thing, and check whether your numbers agree.
-
-### Ring 3 — Human sources
-
-- People inside the institution that created your dataset, to confirm you've analyzed it correctly.
-- Experts outside that institution, with real topic knowledge but no stake in your data's accuracy.
-- Real people and places inside your findings, to test the data against lived experience.
-
-### Center — The main subject of the investigation
-
-- Whoever your findings implicate in wrongdoing or failure — contact them directly for a response before you publish.
-
 ## Homework
 
 Work through the layers for your own story. The goal is to test your finding and develop a plan for the reporting you still need to do.
