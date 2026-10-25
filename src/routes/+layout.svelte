@@ -2,6 +2,7 @@
   import type { Snippet } from 'svelte';
   import type { LayoutData } from './$types';
   import { base } from '$app/paths';
+  import { page } from '$app/state';
   import '../app.css';
 
   let { data, children }: { data: LayoutData; children: Snippet } = $props();
@@ -10,7 +11,10 @@
 <a class="skip-link" href="#main-content">Skip to main content</a>
 
 <header class="masthead">
-  <div class="container masthead-inner">
+  <div
+    class="container masthead-inner"
+    class:critique-masthead={page.route.id === '/critique-wheel'}
+  >
     <div class="brand">
       <a
         class="brand-mark"
@@ -27,3 +31,9 @@
 </header>
 
 {@render children()}
+
+<style>
+  .critique-masthead {
+    max-width: 828px;
+  }
+</style>
