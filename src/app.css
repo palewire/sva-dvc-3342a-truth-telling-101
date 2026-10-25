@@ -455,6 +455,12 @@ h3 {
   background: var(--white);
 }
 
+.scripts-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
 .script-card {
   display: block;
   max-width: 380px;
@@ -735,6 +741,17 @@ h3 {
   border: 1px solid var(--sva-blue);
 }
 
+@media (min-width: 1025px) {
+  .lesson-deck {
+    width: min(1200px, calc(100vw - 48px));
+    max-width: none;
+  }
+
+  .week-body .deck-link {
+    width: min(1200px, calc(100vw - 48px));
+  }
+}
+
 .week-body .deck-link {
   margin-top: 8px;
   font-size: 14px;
@@ -759,6 +776,32 @@ h3 {
 
 .week-body h3 {
   font-size: 24px;
+}
+
+.week-body table {
+  width: 100%;
+  margin: 16px 0 24px;
+  border-collapse: collapse;
+  font-size: 16px;
+}
+
+.week-body th,
+.week-body td {
+  padding: 10px 16px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--rule);
+}
+
+.week-body th {
+  color: var(--sva-charcoal);
+  font-family: var(--font-ui);
+  font-weight: 700;
+  background: var(--surface);
+}
+
+.week-body tr:last-child td {
+  border-bottom: none;
 }
 
 .week-body p,
@@ -900,6 +943,10 @@ a:focus-visible {
   .course-skills {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .scripts-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 760px) {
@@ -1000,6 +1047,11 @@ a:focus-visible {
   .speakers-grid,
   .course-skills {
     grid-template-columns: 1fr;
+  }
+
+  .scripts-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
 
   .script-card {

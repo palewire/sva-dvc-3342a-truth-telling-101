@@ -2,13 +2,39 @@
   import { base } from '$app/paths';
   import { onMount } from 'svelte';
   import type { PageData } from './$types';
+  import ContentNavigation from '$lib/components/ContentNavigation.svelte';
   import Hero from '$lib/components/Hero.svelte';
   import Meta from '$lib/components/Meta.svelte';
 
   let { data }: { data: PageData } = $props();
   const Content = $derived(data.pageComponent);
-  const week = $derived(
-    data.site.schedule.weeks.find((item) => item.number === data.metadata.week)
+  const weekIndex = $derived(
+    data.site.schedule.weeks.findIndex((item) => item.number === data.metadata.week)
+  );
+  const week = $derived(data.site.schedule.weeks[weekIndex]);
+  const previousWeek = $derived(
+    weekIndex > 0 ? data.site.schedule.weeks[weekIndex - 1] : undefined
+  );
+  const nextWeek = $derived(
+    weekIndex >= 0 && weekIndex < data.site.schedule.weeks.length - 1
+      ? data.site.schedule.weeks[weekIndex + 1]
+      : undefined
+  );
+  const previous = $derived(
+    previousWeek?.href
+      ? {
+          href: base + previousWeek.href,
+          title: `Week ${previousWeek.number}: ${previousWeek.topic}`
+        }
+      : null
+  );
+  const next = $derived(
+    nextWeek?.href
+      ? {
+          href: base + nextWeek.href,
+          title: `Week ${nextWeek.number}: ${nextWeek.topic}`
+        }
+      : null
   );
   const canonicalRoot = import.meta.env.VITE_CANONICAL_URL?.replace(/\/+$/, '');
   const canonicalUrl = $derived(
@@ -67,6 +93,7 @@
       <article class="week-body">
         <Content />
       </article>
+      <ContentNavigation {previous} {next} ariaLabel="Week navigation" />
     </div>
   </div>
 </main>
