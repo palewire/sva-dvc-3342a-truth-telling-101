@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 
 const basePath = process.env.BASE_PATH ?? '';
 const canonicalUrl = process.env.VITE_CANONICAL_URL;
@@ -7,11 +7,88 @@ const shareImageUrl = canonicalUrl
   ? new URL(shareImagePath, canonicalUrl).href
   : shareImagePath;
 
+async function runCritiqueSession(page: Page, students: string[]) {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('./critique-wheel/');
+
+  const roster = page.getByRole('textbox', { name: 'Students' });
+  const promptInput = page.getByRole('textbox', { name: 'Prompts' });
+  await roster.fill(students.join('\n'));
+  await promptInput.fill('Ask a question');
+  await expect(promptInput).toHaveValue('Ask a question');
+  await page.getByRole('button', { name: 'Randomize order' }).click();
+  await page.getByRole('button', { name: 'Begin the session' }).click();
+
+  const presenters: string[] = [];
+  const reviewerCounts = new Map(students.map((student) => [student, 0]));
+  let totalResponses = 0;
+
+  for (let presenterIndex = 0; presenterIndex < students.length; presenterIndex += 1) {
+    await expect(
+      page.getByText(`Presenter ${presenterIndex + 1} of ${students.length}`)
+    ).toBeVisible();
+    const currentPresenter = await page.locator('.session-heading h1').innerText();
+    presenters.push(currentPresenter);
+    const reviewerWheel = page.locator('.wheel-svg').first();
+    const currentRow = page.locator('.session-order tbody tr').nth(presenterIndex);
+    const initialWheelLabels = await reviewerWheel.locator('text').allTextContents();
+    expect(initialWheelLabels.length).toBeGreaterThan(0);
+    expect(initialWheelLabels).not.toContain(currentPresenter);
+
+    while (await page.getByRole('button', { name: 'Spin reviewer wheel' }).count()) {
+      const previousResponseCount = await currentRow.locator('.pairing-reviewer').count();
+      await page.getByRole('button', { name: 'Spin reviewer wheel' }).click();
+      await expect(currentRow.locator('.pairing-reviewer')).toHaveCount(
+        previousResponseCount + 1,
+        { timeout: 2000 }
+      );
+      const selectedReviewer = await currentRow
+        .locator('.pairing-reviewer')
+        .last()
+        .innerText();
+      const remainingReviewers = await reviewerWheel.locator('text').allTextContents();
+      expect(remainingReviewers).toContain(selectedReviewer);
+      if (
+        students.length % 2 === 1 &&
+        presenterIndex === students.length - 1 &&
+        previousResponseCount === 0
+      ) {
+        expect(remainingReviewers).toHaveLength(students.length - 1);
+      }
+    }
+
+    const reviewers = await currentRow.locator('.pairing-reviewer').allTextContents();
+    for (const reviewer of reviewers) {
+      reviewerCounts.set(reviewer, (reviewerCounts.get(reviewer) ?? 0) + 1);
+      totalResponses += 1;
+    }
+
+    const nextButton = page.getByRole('button', {
+      name: presenterIndex + 1 < students.length ? 'Next presenter' : 'Finish session'
+    });
+    await expect(nextButton).toBeVisible();
+    await nextButton.click();
+    if (presenterIndex + 1 < students.length) {
+      await expect(
+        page.getByText(`Presenter ${presenterIndex + 2} of ${students.length}`)
+      ).toBeVisible();
+      const nextWheelLabels = await reviewerWheel.locator('text').allTextContents();
+      for (const reviewer of reviewers) expect(nextWheelLabels).not.toContain(reviewer);
+    }
+  }
+
+  await expect(
+    page.getByRole('heading', { name: 'Everyone has presented.' })
+  ).toBeVisible();
+
+  return { presenters, reviewerCounts, totalResponses };
+}
+
 test('shows the SVA course facts without artwork in the hero', async ({ page }) => {
   await page.goto('./');
 
   await expect(page).toHaveTitle(
-    'Truth-Telling 101: Artists Meet Data Journalism | SVA Continuing Education'
+    "Truth-Telling 101: how New York's leading newsrooms turn raw data into compelling journalism | SVA Continuing Education"
   );
   await expect(page.locator('meta[name="description"]')).toHaveAttribute(
     'content',
@@ -142,7 +219,7 @@ test('links the instructor photo to the bio page', async ({ page }) => {
   await expect(emailLink).toHaveCSS('outline-color', 'rgb(230, 31, 0)');
 });
 
-test('links the first classroom script when it is published', async ({ page }) => {
+test('links the published classroom scripts', async ({ page }) => {
   await page.goto('./');
 
   await expect(page.locator('.meeting-dates')).toHaveCount(0);
@@ -151,13 +228,26 @@ test('links the first classroom script when it is published', async ({ page }) =
   await expect(page.locator('#schedule .section-intro')).toHaveText(
     'All of the materials we cover will be made available after class.'
   );
-  await expect(page.locator('.script-card')).toHaveCount(1);
-  await expect(page.locator('.script-card')).toHaveAttribute(
-    'href',
-    `${basePath}/weeks/week-1/`
-  );
-  await expect(page.locator('.script-card h3')).toHaveText('Social science in a hurry');
-  await expect(page.locator('.script-card p')).toHaveText('October 5, 2026');
+
+  const cards = page.locator('.script-card');
+  await expect(cards).toHaveCount(6);
+  await expect(page.locator('.script-card-disabled')).toHaveCount(2);
+
+  const week1 = cards.nth(0);
+  await expect(week1).toHaveAttribute('href', `${basePath}/weeks/week-1/`);
+  await expect(week1.locator('h3')).toHaveText('Social science in a hurry');
+  await expect(week1.locator('p')).toHaveText('October 5, 2026');
+
+  const week2 = cards.nth(1);
+  await expect(week2).toHaveAttribute('href', `${basePath}/weeks/week-2/`);
+  await expect(week2.locator('h3')).toHaveText('Interviewing data');
+  await expect(week2.locator('p')).toHaveText('Monday, Oct. 12, 2026');
+
+  const week3 = cards.nth(2);
+  await expect(week3).toHaveAttribute('href', `${basePath}/weeks/week-3/`);
+  await expect(week3.locator('h3')).toHaveText('Calculating context');
+  await expect(week3.locator('p')).toHaveText('Monday, Oct. 19, 2026');
+
   const sections = page.locator('main > section');
   await expect(sections.nth((await sections.count()) - 1)).toHaveAttribute(
     'id',
@@ -165,11 +255,181 @@ test('links the first classroom script when it is published', async ({ page }) =
   );
 });
 
+for (const { week, slug, embedSuffix } of [
+  { week: 1, slug: 'social-science-in-a-hurry', embedSuffix: '?controls=1#/1' },
+  { week: 4, slug: 'peeling-the-onion', embedSuffix: '?controls=1#/1' }
+]) {
+  test(`Week ${week} lecture deck widens on desktop and fits the mobile text column`, async ({
+    page
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(`./weeks/week-${week}/`);
+
+    const deck = page.locator('.lesson-deck');
+    const deckUrl = `https://palewi.re/docs/sva-dvc-3342a-slide-deck/lectures/${slug}/`;
+    await expect(deck).toHaveAttribute('src', `${deckUrl}${embedSuffix}`);
+    await expect(page.locator('.deck-link a')).toHaveAttribute('href', deckUrl);
+    const placement = await deck.evaluate((iframe) => ({
+      deckTop: iframe.getBoundingClientRect().top,
+      outlineTop:
+        iframe.closest('.week-content')?.querySelector('h2')?.getBoundingClientRect()
+          .top ?? 0
+    }));
+    expect(placement.deckTop).toBeLessThan(placement.outlineTop);
+    const desktopWidths = await deck.evaluate((iframe) => ({
+      deck: iframe.getBoundingClientRect().width,
+      text: iframe.closest('.week-content')?.getBoundingClientRect().width ?? 0,
+      linkRight:
+        document.querySelector('.deck-link a')?.getBoundingClientRect().right ?? 0,
+      deckRight: iframe.getBoundingClientRect().right
+    }));
+    expect(desktopWidths.deck).toBeGreaterThan(desktopWidths.text);
+    expect(desktopWidths.linkRight).toBeCloseTo(desktopWidths.deckRight, 0);
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    const mobileWidths = await deck.evaluate((iframe) => ({
+      deck: iframe.getBoundingClientRect().width,
+      text: iframe.closest('.week-content')?.getBoundingClientRect().width ?? 0,
+      linkRight:
+        document.querySelector('.deck-link a')?.getBoundingClientRect().right ?? 0,
+      deckRight: iframe.getBoundingClientRect().right,
+      page: document.documentElement.scrollWidth
+    }));
+    expect(mobileWidths.deck).toBeCloseTo(mobileWidths.text, 0);
+    expect(mobileWidths.linkRight).toBeCloseTo(mobileWidths.deckRight, 0);
+    expect(mobileWidths.page).toBe(390);
+  });
+}
+
+test('runs the critique wheel without saving or hard-coding a roster', async ({
+  page
+}) => {
+  await page.goto('./critique-wheel/');
+
+  await expect(page).toHaveURL(/\/critique-wheel\/$/);
+  await expect(page).toHaveTitle('Wheel of Feedback | Truth-Telling 101');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Wheel of Feedback');
+  await expect(page.locator('body')).not.toContainText('CUNY');
+  const mastheadLeft = await page
+    .locator('.brand')
+    .evaluate((element) => element.getBoundingClientRect().left);
+  const panelLeft = await page
+    .locator('.setup-panel')
+    .evaluate((element) => element.getBoundingClientRect().left);
+  expect(mastheadLeft).toBeCloseTo(panelLeft, 0);
+
+  const roster = page.getByRole('textbox', { name: 'Students' });
+  await expect(page.getByRole('button', { name: 'Randomize order' })).toBeDisabled();
+  await roster.fill('Alex\nSam\nAlex');
+  await expect(roster).toHaveValue('Alex\nSam\nAlex');
+  await page.getByRole('button', { name: 'Randomize order' }).click();
+
+  await expect(page.getByRole('heading', { name: 'Who presents first?' })).toBeVisible();
+  const orderEntries = page.locator('.presentation-order');
+  await expect(orderEntries.locator('li')).toHaveCount(3);
+  for (const label of ['Alex (1)', 'Sam', 'Alex (2)']) {
+    await expect(orderEntries.getByText(label, { exact: true })).toBeVisible();
+  }
+  await page.getByRole('button', { name: 'Begin the session' }).click();
+
+  await expect(page.getByRole('heading', { level: 1 })).not.toHaveText(
+    'Wheel of Feedback'
+  );
+  await expect(page.locator('.wheel-svg')).toHaveCount(2);
+  await page.getByRole('button', { name: 'Spin both wheels' }).click();
+  await expect(
+    page.getByRole('button', { name: 'The wheels are spinning' })
+  ).toBeDisabled();
+  await expect(
+    page.locator('.session-order tr.current-presenter .pairing-reviewer')
+  ).toHaveCount(1, { timeout: 5000 });
+  await expect(page.locator('.wheel-result')).not.toHaveText([
+    'Reviewer',
+    'Feedback prompt'
+  ]);
+  await expect(page.getByRole('button', { name: 'Next presenter' })).toBeVisible();
+  await page.getByRole('button', { name: 'Next presenter' }).click();
+  await expect(page.getByText('Presenter 2 of 3')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Start over with this roster' }).click();
+  await expect(roster).toHaveValue('Alex\nSam\nAlex');
+  await page.reload();
+  await expect(page.getByRole('textbox', { name: 'Students' })).toHaveValue('');
+
+  const promptInput = page.getByRole('textbox', { name: 'Prompts' });
+  await expect(promptInput).toHaveValue(
+    'Ask a question\nGive a compliment\nSuggest an improvement'
+  );
+  const tenStudents = Array.from({ length: 10 }, (_, index) => `Student ${index + 1}`);
+  await roster.fill(tenStudents.join('\n'));
+  await promptInput.fill('Ask a question');
+  await page.getByRole('button', { name: 'Randomize order' }).click();
+  await page.getByRole('button', { name: 'Begin the session' }).click();
+
+  await expect(page.locator('.wheel-svg')).toHaveCount(1);
+  await expect(page.locator('.wheel-svg path')).toHaveCount(9);
+  await page.getByRole('button', { name: 'Spin reviewer wheel' }).click();
+  await expect(
+    page.locator('.session-order tr.current-presenter .pairing-reviewer')
+  ).toHaveCount(1, { timeout: 5000 });
+  const firstReviewer = await page.locator('.wheel-result').first().innerText();
+  expect(await page.locator('.wheel-svg text').allTextContents()).toContain(
+    firstReviewer
+  );
+  await page.getByRole('button', { name: 'Next presenter' }).click();
+  await expect(page.getByText('Presenter 2 of 10')).toBeVisible();
+  expect(await page.locator('.wheel-svg text').allTextContents()).not.toContain(
+    firstReviewer
+  );
+});
+
+test('gives every student one presentation and critique with an even roster', async ({
+  page
+}) => {
+  const students = Array.from({ length: 10 }, (_, index) => `Student ${index + 1}`);
+  const { presenters, reviewerCounts, totalResponses } = await runCritiqueSession(
+    page,
+    students
+  );
+
+  expect([...presenters].sort()).toEqual([...students].sort());
+  expect([...reviewerCounts.values()]).toEqual(students.map(() => 1));
+  expect(totalResponses).toBe(students.length);
+});
+
+test('gives everyone a presentation and critique plus one extra critique with an odd roster', async ({
+  page
+}) => {
+  const students = Array.from({ length: 5 }, (_, index) => `Student ${index + 1}`);
+  const { presenters, reviewerCounts, totalResponses } = await runCritiqueSession(
+    page,
+    students
+  );
+
+  expect([...presenters].sort()).toEqual([...students].sort());
+  expect(totalResponses).toBe(students.length + 1);
+  expect([...reviewerCounts.values()].sort((first, second) => first - second)).toEqual([
+    1, 1, 1, 1, 2
+  ]);
+});
+
+test('limits each feedback prompt to 80 characters', async ({ page }) => {
+  await page.goto('./critique-wheel/');
+
+  const roster = page.getByRole('textbox', { name: 'Students' });
+  const promptInput = page.getByRole('textbox', { name: 'Prompts' });
+  await roster.fill('Alex\nSam');
+  await promptInput.fill(`${'A'.repeat(90)}\n${'B'.repeat(81)}`);
+
+  await expect(promptInput).toHaveValue(`${'A'.repeat(80)}\n${'B'.repeat(80)}`);
+  await expect(page.getByRole('button', { name: 'Randomize order' })).toBeEnabled();
+});
+
 test('renders the published week one page', async ({ page }) => {
   await page.goto('./weeks/week-1/');
 
   await expect(page).toHaveTitle(
-    'Social science in a hurry | Truth-Telling 101: Artists Meet Data Journalism'
+    "Social science in a hurry | Truth-Telling 101: How New York's leading newsrooms turn raw data into compelling journalism"
   );
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
     'Social science in a hurry'
@@ -234,9 +494,9 @@ test('fits a phone screen and supports the keyboard skip link', async ({ page })
     () => document.documentElement.scrollWidth - document.documentElement.clientWidth
   );
   expect(overflow).toBeLessThanOrEqual(1);
-  const scriptCard = page.locator('.script-card');
+  const scriptCard = page.locator('.script-card').first();
   const skillCard = page.locator('.course-skill').first();
-  await expect(scriptCard).toHaveCount(1);
+  await expect(page.locator('.script-card')).toHaveCount(6);
   await expect(page.locator('.speaker-card')).toHaveCount(3);
   await expect(scriptCard).toHaveCSS('padding', '12px');
   await expect(skillCard).toHaveCSS('padding', '12px');
@@ -244,7 +504,7 @@ test('fits a phone screen and supports the keyboard skip link', async ({ page })
   await expect(page.locator('.section-header h2').first()).toHaveCSS('font-size', '26px');
   await expect(page.locator('.section-intro').first()).toHaveCSS('font-size', '16px');
   await expect(page.locator('.course-skill h3').first()).toHaveCSS('font-size', '16px');
-  await expect(page.locator('.script-card h3')).toHaveCSS('font-size', '20px');
+  await expect(page.locator('.script-card h3').first()).toHaveCSS('font-size', '20px');
   for (const portrait of await page.locator('.speaker-portrait').all()) {
     await expect(portrait).toHaveCSS('background-color', 'rgb(30, 150, 184)');
     await expect(portrait).toHaveCSS('border-radius', '0px');
@@ -284,7 +544,7 @@ test('prints the syllabus in black on white without navigation or portrait block
   for (const portrait of await page.locator('.speaker-portrait').all()) {
     await expect(portrait).toBeHidden();
   }
-  await expect(page.locator('.script-card')).toHaveCount(1);
+  await expect(page.locator('.script-card')).toHaveCount(6);
   expect(
     await page
       .locator('.hero')
