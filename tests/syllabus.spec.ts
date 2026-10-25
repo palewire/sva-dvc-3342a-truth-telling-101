@@ -231,7 +231,7 @@ test('links the published classroom scripts', async ({ page }) => {
 
   const cards = page.locator('.script-card');
   await expect(cards).toHaveCount(6);
-  await expect(page.locator('.script-card-disabled')).toHaveCount(3);
+  await expect(page.locator('.script-card-disabled')).toHaveCount(2);
 
   const week1 = cards.nth(0);
   await expect(week1).toHaveAttribute('href', `${basePath}/weeks/week-1/`);

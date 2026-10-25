@@ -1,0 +1,88 @@
+---
+title: 'Peeling the onion'
+summary: 'How reporters verify their findings by working from the outside in'
+week: 4
+---
+
+<script>
+  import { base } from '$app/paths';
+
+  const critiqueWheelHref = base + '/critique-wheel/';
+</script>
+
+## Class outline
+
+1. **Homework presentations guided by the <a href={critiqueWheelHref}>Wheel of Feedback</a>**
+2. **Guest appearance by [Haidee Chu](https://www.thecityreporter.nyc/author/haidee/)**
+3. **Break**
+4. **Presentation on Peeling the Onion**
+5. **New homework assignments for next week**
+
+## Lecture deck
+
+The lecture deck will be added here.
+
+<!-- Embed the finished deck from the separate presentation repository here,
+     using Week 1's lesson-deck iframe and deck-link styles. -->
+
+## The outside-in method
+
+Finding a pattern in a spreadsheet is a beginning. Before publishing, reporters need to test their findings against documents, independent sources and the people at the center of the story.
+
+The model comes from *The Investigative Reporter's Handbook: A Guide to Documents, Databases, and Techniques*, from Investigative Reporters and Editors, edited across editions by Brant Houston, with Len Bruzzese and Steve Weinberg on earlier editions. Its first chapter describes "working from the outside in":
+
+> Rendered graphically, the approach would resemble concentric circles, with the outermost circle labeled "secondary sources," the middle circle called "primary documents," and the inner circle, "human sources." The main subject of the investigation is at the center.
+
+For data journalism, we also need to verify our own analysis. Use the rings below to work from what's already been published toward the people at the center of your findings.
+
+### Ring 1 — Secondary sources
+
+What's already been published:
+
+- Search the web for anyone else who has reported the same findings, or used this dataset before.
+
+### Ring 2 — Primary documents
+
+The raw records:
+
+- Reproduce your own path to your findings, step by step, in your original data.
+- Find a second, independent dataset that measures the same thing, and check whether your numbers agree.
+
+### Ring 3 — Human sources
+
+- People inside the institution that created your dataset, to confirm you've analyzed it correctly.
+- Experts outside that institution, with real topic knowledge but no stake in your data's accuracy.
+- Real people and places inside your findings, to test the data against lived experience.
+
+### Center — The main subject of the investigation
+
+- Whoever your findings implicate in wrongdoing or failure — contact them directly for a response before you publish.
+
+## Homework
+
+Work through the layers for your own story. The goal is to test your finding and develop a plan for the reporting you still need to do.
+
+### Task 1: Work from the outside in
+
+Search for what's already been published about your finding or dataset. Retrace your analysis in the original data, then look for a second, independent dataset that could help you check your numbers.
+
+Keep notes on what you checked, what you learned and what you still cannot verify.
+
+### Task 2: Identify your human sources
+
+At a minimum, identify at least one person to contact in each of these groups:
+
+- **Inside the institution:** Someone involved in creating or maintaining your dataset who can check whether you've understood it correctly.
+- **Outside experts:** Someone with topic knowledge who is independent of the institution that produced your data.
+- **People in your findings:** Someone whose experience can help you test what the data says about real people and places.
+- **The subject of your story:** Someone who can respond on behalf of the person or institution whose actions your findings examine.
+
+For each source, record their name and role, how you could contact them and the questions you want to ask.
+
+### Task 3: Prepare to present
+
+Be ready to share your finding, your source list and what you still need to verify with the class next week.
+
+### Bonus points: Make contact
+
+Actually contact the human sources you've identified. Keep track of whom you contacted, any responses and how those conversations changed your understanding of the story.
