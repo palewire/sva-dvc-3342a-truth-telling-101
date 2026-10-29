@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@lucide/svelte':
-        specifier: ^1.55.0
-        version: 1.55.0(svelte@5.57.2(@typescript-eslint/types@8.71.2))
+        specifier: ^1.61.0
+        version: 1.61.0(svelte@5.57.2(@typescript-eslint/types@8.71.2))
       js-yaml:
         specifier: ^5.4.3
         version: 5.4.3
@@ -196,8 +196,8 @@ packages:
   '@lhci/utils@0.15.1':
     resolution: {integrity: sha512-WclJnUQJeOMY271JSuaOjCv/aA0pgvuHZS29NFNdIeI14id8eiFsjith85EGKYhljgoQhJ2SiW4PsVfFiakNNw==}
 
-  '@lucide/svelte@1.55.0':
-    resolution: {integrity: sha512-CTxJ3qbkDK2oCW1VJYKhqAUfOongRJqc9YWmJZn8E06QpCU7i5yAnUny4h/zMNy/iYpMtGiJDRSb6AVIornuXg==}
+  '@lucide/svelte@1.61.0':
+    resolution: {integrity: sha512-Vwj4ADoKgVogLFpEbXv2PS2hh2fj+aAqPuiNydI88Zkyb1l7veL4fXgRrOX3tgpESHhIGneNkSSYhHupvCBshg==}
     peerDependencies:
       svelte: ^5
 
@@ -1309,8 +1309,8 @@ packages:
   known-css-properties@0.37.0:
     resolution: {integrity: sha512-JCDrsP4Z1Sb9JwG0aJ8Eo2r7k4Ou5MwmThS/6lcIe1ICyb7UBJKGRIUUdqc2ASdE/42lgz6zFUnzAIhtXnBVrQ==}
 
-  legacy-javascript@0.0.3:
-    resolution: {integrity: sha512-1r6MT4dVaJyXt4G07Cm2cQ0AUaLJdefiEp4SmIAylA++gnEQ82YvmzE58RkM5EP0fk5hROLCslUPGnwIYdZQVA==}
+  legacy-javascript@0.0.4:
+    resolution: {integrity: sha512-UTmeKBVxnfJcpmpOvzzNnLsQT99BXHpPlc/ZKddIRmWmrR0fw6335I3lq4+sJoP60UTbBNaYsGYVPc65YB1x3A==}
 
   levn@0.4.1:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}
@@ -2500,7 +2500,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@lucide/svelte@1.55.0(svelte@5.57.2(@typescript-eslint/types@8.71.2))':
+  '@lucide/svelte@1.61.0(svelte@5.57.2(@typescript-eslint/types@8.71.2))':
     dependencies:
       svelte: 5.57.2(@typescript-eslint/types@8.71.2)
 
@@ -2508,7 +2508,7 @@ snapshots:
 
   '@paulirish/trace_engine@0.0.53':
     dependencies:
-      legacy-javascript: 0.0.3
+      legacy-javascript: 0.0.4
       third-party-web: 0.30.0
 
   '@playwright/test@1.64.0':
@@ -3651,7 +3651,7 @@ snapshots:
 
   known-css-properties@0.37.0: {}
 
-  legacy-javascript@0.0.3: {}
+  legacy-javascript@0.0.4: {}
 
   levn@0.4.1:
     dependencies:
