@@ -46,9 +46,10 @@ Break into groups of 2 or 3 and analyze one of the following stories.
 
 ### Questions
 
-1. Can you find the four elements in the story? Are any missing?
-2. What's the most important number? Where does it appear?
-3. Can you find any numbers that could be cut?
+1. Is it a delayed lead or a direct lead?
+2. Can you find the four elements in the story? Are any missing?
+3. What's the most important number? Where does it appear?
+4. Can you find any numbers that could be cut?
 
 ## Homework
 
