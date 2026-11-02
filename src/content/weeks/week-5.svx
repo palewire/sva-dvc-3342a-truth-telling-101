@@ -1,0 +1,65 @@
+---
+title: 'Take it from the top'
+summary: 'The four fundamentals of data-driven news writing'
+week: 5
+---
+
+<script>
+  import { base } from '$app/paths';
+
+  const critiqueWheelHref = base + '/critique-wheel/';
+</script>
+
+<iframe
+  class="lesson-deck"
+  src="https://palewi.re/docs/sva-dvc-3342a-slide-deck/lectures/take-it-from-the-top/?controls=1#/1"
+  title="Take it from the top lecture deck"
+  width="100%"
+  height="600"
+  loading="lazy"
+  allowfullscreen
+></iframe>
+
+<p class="deck-link">
+  <a href="https://palewi.re/docs/sva-dvc-3342a-slide-deck/lectures/take-it-from-the-top/" target="_blank" rel="noopener noreferrer">Open deck in a new tab</a>
+</p>
+
+## Class outline
+
+1. Homework presentations guided by the <a href={critiqueWheelHref}>Wheel of Feedback</a>
+2. Break
+3. Presentation on news writing
+4. Story dissection exercise
+5. New homework assignments for next week
+
+## Story dissection exercise
+
+Break into groups of 2 or 3 and analyze one of the following stories.
+
+### Stories
+
+- Gothamist: [Complaints of parking placard abuse by NYC employees double in a year, 311 data shows](https://gothamist.com/news/complaints-of-parking-placard-abuse-by-nyc-employees-double-in-a-year-311-data-shows)
+- The City Reporter: [Newbie Cops Get Thrown at Problem Areas Leading to Rookie Mistakes and Attrition](https://www.thecity.nyc/2023/05/01/newbie-cops-get-thrown-at-problem-areas/)
+- Streetsblog: [Data Analysis: Super Speeders and Red Light Violators Are Less Likely to Get NYPD Tickets](https://nyc.streetsblog.org/2026/01/30/data-analysis-super-speeders-and-red-light-violators-are-less-likely-to-get-nypd-tickets)
+- Hell Gate: [The NYPD's Watchdog Whitewashed More Than 10,000 Misconduct Allegations in Public Data, New Evidence Shows](https://hellgatenyc.com/ccrb-whitewashed-more-than-10000-allegations/)
+- City Limits: [How NYC Closed Tens of Thousands of 'No Heat' Complaints Without Conducting an Inspection](https://citylimits.org/how-nyc-closed-tens-of-thousands-of-no-heat-complaints-without-conducting-an-inspection/)
+
+### Questions
+
+1. Can you find the four elements in the story? Are any missing?
+2. What's the most important number? Where does it appear?
+3. Can you find any numbers that could be cut?
+
+## Homework
+
+### Task 1: Develop a simple finding
+
+Return to a data set you've been analyzing in previous weeks. Develop a simple finding you can back up with a number you calculated yourself. It doesn't have to be earth-shattering news but it should be an answer to a question that you can clearly explain.
+
+### Task 2: Draft your top
+
+Write the top of a news story, about 100–150 words, for a general reader. Use a direct lead, not a delayed lead. Open with the news itself, stated plainly, in the first sentence. Use numbers sparingly. Spell out what you've found without a data dump. Your top must hit all four fundamentals: the lead, the nut, the findings and the caveats.
+
+### Task 3: Prepare to share
+
+Next week, everyone will read their top aloud. Be ready to share the spreadsheet work or other calculation behind your finding.
