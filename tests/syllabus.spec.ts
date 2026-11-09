@@ -250,7 +250,7 @@ test('links the published classroom scripts', async ({ page }) => {
 
   const week5 = cards.nth(4);
   await expect(week5).toHaveAttribute('href', `${basePath}/weeks/week-5/`);
-  await expect(week5.locator('h3')).toHaveText('Take it from the top');
+  await expect(week5.locator('h3')).toHaveText('Taking it from the top');
   await expect(week5.locator('p')).toHaveText('Monday, Nov. 2, 2026');
 
   const week6 = cards.nth(5);
@@ -310,6 +310,18 @@ for (const { week, slug, embedSuffix } of [
     expect(mobileWidths.page).toBe(390);
   });
 }
+
+test('uses the Week 5 course title and preserves the deck title', async ({ page }) => {
+  await page.goto('./weeks/week-5/');
+
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'Taking it from the top'
+  );
+  await expect(page.locator('.lesson-deck')).toHaveAttribute(
+    'title',
+    'Take it from the top lecture deck'
+  );
+});
 
 test('shows the Week 6 class outline without a deck or tutorial', async ({ page }) => {
   await page.goto('./weeks/week-6/');

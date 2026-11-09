@@ -79,7 +79,7 @@ schedule:
     - number: 5
       date: '2026-11-02'
       displayDate: 'Monday, Nov. 2, 2026'
-      topic: 'Take it from the top'
+      topic: 'Taking it from the top'
       href: /weeks/week-5/
     - number: 6
       date: '2026-11-09'
