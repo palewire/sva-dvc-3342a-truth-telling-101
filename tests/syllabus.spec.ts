@@ -231,7 +231,7 @@ test('links the published classroom scripts', async ({ page }) => {
 
   const cards = page.locator('.script-card');
   await expect(cards).toHaveCount(6);
-  await expect(page.locator('.script-card-disabled')).toHaveCount(1);
+  await expect(page.locator('.script-card-disabled')).toHaveCount(0);
 
   const week1 = cards.nth(0);
   await expect(week1).toHaveAttribute('href', `${basePath}/weeks/week-1/`);
@@ -247,6 +247,16 @@ test('links the published classroom scripts', async ({ page }) => {
   await expect(week3).toHaveAttribute('href', `${basePath}/weeks/week-3/`);
   await expect(week3.locator('h3')).toHaveText('Calculating context');
   await expect(week3.locator('p')).toHaveText('Monday, Oct. 19, 2026');
+
+  const week5 = cards.nth(4);
+  await expect(week5).toHaveAttribute('href', `${basePath}/weeks/week-5/`);
+  await expect(week5.locator('h3')).toHaveText('Take it from the top');
+  await expect(week5.locator('p')).toHaveText('Monday, Nov. 2, 2026');
+
+  const week6 = cards.nth(5);
+  await expect(week6).toHaveAttribute('href', `${basePath}/weeks/week-6/`);
+  await expect(week6.locator('h3')).toHaveText('Accelerating with AI');
+  await expect(week6.locator('p')).toHaveText('Monday, Nov. 9, 2026');
 
   const sections = page.locator('main > section');
   await expect(sections.nth((await sections.count()) - 1)).toHaveAttribute(
@@ -300,6 +310,30 @@ for (const { week, slug, embedSuffix } of [
     expect(mobileWidths.page).toBe(390);
   });
 }
+
+test('shows the Week 6 class outline without a deck or tutorial', async ({ page }) => {
+  await page.goto('./weeks/week-6/');
+
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'Accelerating with AI'
+  );
+  await expect(page.locator('.week-summary')).toHaveText(
+    'How coding-writing assistants can help you get things done'
+  );
+  await expect(page.locator('.week-content ol > li')).toHaveCount(4);
+  await expect(page.locator('.week-content ol > li')).toHaveText([
+    'Our homework presentations with the Wheel of Feedback',
+    'A presentation by Bianca Pallaro',
+    'Break',
+    'A speed run of everything we covered in class using AI coding assistants'
+  ]);
+  await expect(page.getByRole('link', { name: 'Wheel of Feedback' })).toHaveAttribute(
+    'href',
+    `${basePath}/critique-wheel/`
+  );
+  await expect(page.locator('iframe')).toHaveCount(0);
+  await expect(page.locator('body')).not.toContainText('tutorial');
+});
 
 test('runs the critique wheel without saving or hard-coding a roster', async ({
   page

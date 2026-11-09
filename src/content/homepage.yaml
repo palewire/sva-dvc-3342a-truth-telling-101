@@ -84,7 +84,8 @@ schedule:
     - number: 6
       date: '2026-11-09'
       displayDate: 'Monday, Nov. 9, 2026'
-      topic: 'To be announced'
+      topic: 'Accelerating with AI'
+      href: /weeks/week-6/
 
 guestSpeakers:
   kicker: 'Visiting experts'
