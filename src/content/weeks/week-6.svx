@@ -1,0 +1,18 @@
+---
+title: 'Accelerating with AI'
+summary: 'How coding-writing assistants can help you get things done'
+week: 6
+---
+
+<script>
+  import { base } from '$app/paths';
+
+  const critiqueWheelHref = base + '/critique-wheel/';
+</script>
+
+## Class outline
+
+1. **Our homework presentations with the <a href={critiqueWheelHref}>Wheel of Feedback</a>**
+2. **A presentation by [Bianca Pallaro](https://www.nytimes.com/by/bianca-pallaro)**
+3. **Break**
+4. **A speed run of everything we covered in class using AI coding assistants**
