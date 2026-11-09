@@ -1,5 +1,5 @@
 ---
-title: 'Take it from the top'
+title: 'Taking it from the top'
 summary: 'The four fundamentals of data-driven news writing'
 week: 5
 ---
